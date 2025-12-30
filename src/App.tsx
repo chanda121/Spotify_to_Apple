@@ -1,19 +1,10 @@
 import './App.css'
+import Header from './components/Header.js'
 
 function App() {
   return (
     <>
-      <div className='header'>
-        <div>
-          <a className='logo'>PLACEHOLDER</a>
-        </div>
-        <div>
-          <div className='header-menu-items'>
-            menu item
-          </div>
-
-        </div>
-      </div>
+      <Header />
       <h1>PLACEHOLDER</h1>
 
     </>
