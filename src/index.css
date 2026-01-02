@@ -45,7 +45,6 @@ a {
 }
 a:hover {
   color: var(--color-accent-hover);
-  text-decoration: underline;
   cursor: pointer;
 }
 h1 {
@@ -57,7 +56,6 @@ body {
   min-width: 320px;
   min-height: 100vh;
 }
-
 button {
   border-radius: 1px;
   border: 1px solid var(--color-border);
@@ -85,9 +83,12 @@ button:focus-visible {
 
 .header {
   display: flex;
-  padding: 15px 10px;
+  padding: 0.5rem 0.25rem;
   justify-content: space-between;
   align-items: center;
+  border-style: solid;
+  border-width: 5px;
+  border-color: red;
 }
 
 .header-menu-items {
@@ -97,8 +98,28 @@ button:focus-visible {
   font-size: 1em;
 }
 
-.logo {
-  font-size: 2.2em;
+.header-nav-link {
+  padding: 0.3em 0.6em;
+  border: 1px groove var(--color-border);
+  border-radius: 1px;
+
+  font-family: inherit;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  
 }
 
+.logo {
+  font-size: 2.2em;
+  color: var(--color-text);
+}
 
+.hamburger {
+  display: none;
+}
+
+@media (max-width: 850px){
+  .hamburger {
+    display:fixed;
+  }
+}

@@ -23,7 +23,7 @@ export function ThemeToggle() {
 
     return (
         <button onClick={toggleDark}
-                className='w-10 h-9 flex items-center justify-center rounded-lg p-2'
+                className='w-10 h-8 flex items-center justify-center'
         >
             <MoonIcon className='w-8 h-8 text-violet-700 block dark:hidden' />
             <SunIcon className='w-8 h-8 text-yellow-500 hidden dark:block' />
