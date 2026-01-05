@@ -114,12 +114,27 @@ button:focus-visible {
   color: var(--color-text);
 }
 
-.hamburger {
+.dropdown {
+  display: flex;
+  flex-direction: column;
+  position: absolute;
+  right: 0; /*right alignment*/
+  top: 100%;
+  z-index: 10;
+}
+
+.header-hamburger-button {
   display: none;
+  position: relative;
 }
 
 @media (max-width: 850px){
-  .hamburger {
-    display:fixed;
+  .header-hamburger-button {
+    display:flex;
+    position: relative;
+  }
+
+  .header-menu-items {
+    display:none;
   }
 }

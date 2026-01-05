@@ -1,7 +1,41 @@
+import { useState, useRef, useEffect } from "react"
 import { ThemeToggle } from "./ThemeToggle"
-import { Link } from 'react-router-dom'
+import { headerNavItems } from "../data/header-nav-links"
+import { Link } from "react-router-dom"
 
 export default function Header() {
+	const [hamburgerOpen, setHamburgerOpen] = useState(false)
+	const dropdownRef = useRef<HTMLDivElement | null>(null)
+
+	const toggleHamburger = () => {
+		setHamburgerOpen(!hamburgerOpen)
+	}
+	const closeHamburger = () => {
+		setHamburgerOpen(false)
+	}
+
+	useEffect(() => {
+		if (!hamburgerOpen) return
+
+		const handleClickOutside = (event: MouseEvent) => {
+			if (!dropdownRef.current) return
+
+			if (!dropdownRef.current.contains(event.target as Node)) {
+				closeHamburger()
+			}
+		}
+		document.addEventListener('mousedown', handleClickOutside)
+
+		return () => {
+			document.removeEventListener('mousedown', handleClickOutside)
+		}
+	}, [hamburgerOpen])
+
+
+	const listItems = headerNavItems.map(nav_item => 
+		<Link onClick={closeHamburger} className='header-nav-link' key={nav_item.id} to={nav_item.link}>{nav_item.label}</Link>
+	)
+
 return (
 <header className='header'>
 	<div className='logo'>
@@ -9,12 +43,25 @@ return (
 	</div>
 	<div className='header-menu-items'>
 		<nav className='p-2'>
-			<Link className='header-nav-link' to='/stats'>Stats</Link>
-			<Link className='header-nav-link' to='/transfer-playlist'>Transfer Playlist</Link>
-			<Link className='header-nav-link' to='/about'>About</Link>
+			{listItems}
 		</nav>
-		<ThemeToggle/>
+		<ThemeToggle/>	
 	</div>
+	<div className='header-hamburger-button' ref={dropdownRef}>
+		<button onClick={toggleHamburger}>
+			Hamburger
+		</button>
+		{
+			hamburgerOpen &&
+			<div className='dropdown' >
+				{listItems}
+				<ThemeToggle/>
+			</div>
+		}			
+	</div>
+	
+
+
 </header>
 
 )
