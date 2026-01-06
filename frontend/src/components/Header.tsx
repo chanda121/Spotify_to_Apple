@@ -3,7 +3,7 @@ import { ThemeToggle } from "./ThemeToggle"
 import { headerNavItems } from "../data/header-nav-links"
 import { Link } from "react-router-dom"
 
-export default function Header() {
+export function Header() {
 	const [hamburgerOpen, setHamburgerOpen] = useState(false)
 	const dropdownRef = useRef<HTMLDivElement | null>(null)
 

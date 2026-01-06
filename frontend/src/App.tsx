@@ -1,5 +1,5 @@
 import './App.css'
-import Header from './components/Header'
+import { Header } from './components/Header'
 import { Home, About, Stats, Transfer } from './views'
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom'

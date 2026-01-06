@@ -1,4 +1,10 @@
-export const headerNavItems = [{
+interface NavItem {
+    id: number;
+    label: string;
+    link: string;
+}
+
+export const headerNavItems: NavItem[] = [{
     id: 0,
     label: 'Stats',
     link: '/stats'
