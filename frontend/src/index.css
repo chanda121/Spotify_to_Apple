@@ -37,7 +37,12 @@
 
   color-scheme: dark;
 }
-
+body {
+  margin: 0;
+  width: 100vw;
+  min-width: 320px;
+  min-height: 100vh;
+}
 a {
   font-weight: 500;
   color: var(--color-accent);
@@ -50,12 +55,7 @@ a:hover {
 h1 {
   font-size: 3.2em;
 }
-body {
-  margin: 0;
-  width: 100vw;
-  min-width: 320px;
-  min-height: 100vh;
-}
+
 button {
   border-radius: 1px;
   border: 1px solid var(--color-border);
