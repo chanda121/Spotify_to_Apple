@@ -14,10 +14,8 @@ const generateRandomString = (length) => {
   return values.reduce((acc, x) => acc + possible[x % possible.length], "");
 }
 
-const sha256 = async (plain) => {
-    const encoder = new TextEncoder()
-    const data = encoder.encode(plain)
-    return window.crypto.subtle.digest('SHA-256', data)
+const sha256 = (bufferOrString) => {
+    return crypto.createHash('sha256').update(bufferOrString).digest()
 }
 
 const base64encode = (input) => {
@@ -30,7 +28,7 @@ const base64encode = (input) => {
 router.get('/auth', async (req, res) => {
     req.session.generatedState = generateRandomString(16)
     req.session.codeVerifier = generateRandomString(64)
-    const hashed = await sha256(req.session.codeVerifier)
+    const hashed = sha256(req.session.codeVerifier)
     const codeChallenge = base64encode(hashed)
     console.log(`code verifier: `)
 
@@ -41,7 +39,7 @@ router.get('/auth', async (req, res) => {
         client_id: client_id,
         response_type: 'code',
         redirect_uri: redirect_auth_uri,
-        state: generatedState,
+        state: req.session.generatedState,
         scope: scope,
         code_challenge_method: 'S256',
         code_challenge: codeChallenge
@@ -54,6 +52,9 @@ router.get('/callback', async (req, res) => {
     const code = req.query.code || null
     const state = req.query.state || null
     const err = req.query.error || null
+
+    console.log(`Got code and state: ${code} and ${state}`)
+    console.log(`looking at express session data:\ngeneratedState:${req.session.generatedState}\ncodeVerifier:${req.session.codeVerifier}`)
 
     if (state === null || state != req.session.generatedState) {
         const errorParams = new URLSearchParams({ error: 'state_mismatch' })
@@ -77,7 +78,7 @@ router.get('/callback', async (req, res) => {
                 code: code,
                 redirect_uri: redirect_auth_uri,
                 client_id: client_id,
-                code_verifier: req.session.code
+                code_verifier: req.session.codeVerifier
             })
         })
 
