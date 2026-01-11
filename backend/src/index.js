@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './.env' });
+
 const express = require('express')
 const createError = require('http-errors')
 const session = require('express-session')
@@ -28,7 +30,7 @@ app.use((req, res, next) => {
 })
 //error handler
 app.use((err, req, res, next) => {
-    console.error(err)
+    //console.error(err)
     res.status(err.status || 500);
     res.json(err.status==404 ? {"error":{"message": "Not Found"}} : {"error":{"message": "Internal Server Error"}})
 })
