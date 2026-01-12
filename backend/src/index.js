@@ -2,6 +2,7 @@ require('dotenv').config({ path: './.env' });
 
 const express = require('express')
 const session = require('express-session')
+const createError = require('http-errors')
 
 const healthRouter = require('./routes/health')
 const authRouter = require('./routes/auth')

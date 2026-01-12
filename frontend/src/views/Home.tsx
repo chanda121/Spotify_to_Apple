@@ -1,4 +1,4 @@
-import { redirect_authorize } from '../services/auth'
+import { redirect_authorize } from '../auth/auth'
 
 export function Home() {
 

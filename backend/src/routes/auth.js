@@ -112,7 +112,7 @@ router.get('/callback', async (req, res) => {
 
 router.get('/refresh_token', async (req, res) => {
 
-    let refresh_token = req.session.spotify ? req.session.spotify_token.refresh_token : null
+    let refresh_token = req.session.spotify_token ? req.session.spotify_token.refresh_token : null
 
     try {
         const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
