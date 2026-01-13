@@ -4,7 +4,7 @@ const express = require('express')
 const session = require('express-session')
 const createError = require('http-errors')
 
-const healthRouter = require('./routes/health')
+const userRouter = require('./routes/user')
 const authRouter = require('./routes/auth')
 
 const app = express()
@@ -18,7 +18,7 @@ app.use(session({
     cookie: { secure: false }
 }))
 
-app.use('/api/health', healthRouter)
+app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
 app.get("/", (req, res) => {
     res.send('Hello World')

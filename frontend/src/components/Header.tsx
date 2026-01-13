@@ -2,10 +2,12 @@ import { useState, useRef, useEffect } from "react"
 import { ThemeToggle } from "./ThemeToggle"
 import { headerNavItems } from "../data/header-nav-links"
 import { Link } from "react-router-dom"
+import { useAuth } from '../auth/authContext'
 
 export function Header() {
 	const [hamburgerOpen, setHamburgerOpen] = useState(false)
 	const dropdownRef = useRef<HTMLDivElement | null>(null)
+	const { status, logout } = useAuth()
 
 	const toggleHamburger = () => {
 		setHamburgerOpen(!hamburgerOpen)
@@ -32,9 +34,19 @@ export function Header() {
 	}, [hamburgerOpen])
 
 
-	const listItems = headerNavItems.map(nav_item => 
+	const listItemsNav = headerNavItems.map(nav_item => 
 		<Link onClick={closeHamburger} className='header-nav-link' key={nav_item.id} to={nav_item.link}>{nav_item.label}</Link>
 	)
+	let listItems = null
+	
+	if (status === 'logged_in') {
+		listItems = [...listItemsNav, 
+			<button key='logout-button' className='text-sm py-0.5 'onClick={logout}>Logout</button>
+		]		
+	} else {
+		listItems = [...listItemsNav]
+	}
+
 
 return (
 <header className='header'>
@@ -45,7 +57,7 @@ return (
 		<nav className='p-2'>
 			{listItems}
 		</nav>
-		<ThemeToggle/>	
+		<ThemeToggle/>
 	</div>
 	<div className='header-hamburger-button' ref={dropdownRef}>
 		<button onClick={toggleHamburger}>

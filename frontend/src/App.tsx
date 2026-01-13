@@ -1,8 +1,10 @@
 import './App.css'
 import { Header } from './components/Header'
 import { Home, About, Stats, Transfer } from './views'
+import { ProtectedRoute } from './auth/ProtectedRoute'
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
+
 
 function App() {
 return (
@@ -10,8 +12,16 @@ return (
      	<Header />
 		<Routes>
 			<Route path='/' element={<Home />} />
-			<Route path='/stats' element={<Stats />} />
-			<Route path='/transfer-playlist' element={<Transfer />} />
+			<Route path='/stats' element={
+				<ProtectedRoute>
+					<Stats />					
+				</ProtectedRoute>
+			} />
+			<Route path='/transfer-playlist' element={
+				<ProtectedRoute>
+					<Transfer />
+				</ProtectedRoute> 
+			} />
 			<Route path='/about' element={<About />} />
       	</Routes>
     </BrowserRouter>

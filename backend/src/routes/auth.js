@@ -1,7 +1,7 @@
 const express = require('express')
 const crypto = require('crypto')
 
-const { addSecs } = require('../utils/dateUtils')
+const { refresh_token } = require('../utils/utils')
 
 const router = express.Router()
 
@@ -17,7 +17,7 @@ const redirect_auth_uri = process.env.SPOTIFY_REDIRECT_URI
         access_token: data.access_token,
         refresh_token: data.refresh_token,
         expires_in: data.expires_in,
-        expires_datetime: 
+        expires_datetime: (Date.now()+data.expires_in*1000
     }
 */
 
@@ -97,7 +97,7 @@ router.get('/callback', async (req, res) => {
             access_token: data.access_token,
             refresh_token: data.refresh_token,
             expires_in: data.expires_in,
-            expires_datetime: addSecs(new Date(), data.expires_in)
+            expires_datetime: Date.now()+data.expires_in*1000
         }
 
         delete req.session.generatedState
@@ -111,42 +111,19 @@ router.get('/callback', async (req, res) => {
 })
 
 router.get('/refresh_token', async (req, res) => {
+    const success = await refresh_token(req)
 
-    let refresh_token = req.session.spotify_token ? req.session.spotify_token.refresh_token : null
-
-    try {
-        const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
-            method: 'POST',
-            headers: {
-                'content-type': 'application/x-www-form-urlencoded'
-            },
-            body: new URLSearchParams({
-                client_id: client_id,
-                grant_type: 'refresh_token',
-                refresh_token: refresh_token
-            })
-        })
-
-        const data = await tokenResponse.json()
-
-        if (data.error) {
-            const errorParams = new URLSearchParams({ error: data.error })
-            return res.redirect('/?' + errorParams.toString())
-        }
-        
-        req.session.spotify_token = {
-            access_token: data.access_token,
-            refresh_token: data.refresh_token,
-            expires_in: data.expires_in,
-            expires_datetime: addSecs(new Date(), data.expires_in)
-        }
-        console.log('in refresh\n'+req.session.spotify_token)
-        
-        res.redirect('http://127.0.0.1:5173/') //TODO: bring back to page refresh happened on
-    } catch (error) {
-        console.error('Token refresh error:', error)
-        res.status(500).json({ error: 'Failed to refresh token' })
+    if (!success) {
+        return res.status(401).json({ ok: false })
     }
+    res.redirect('http://127.0.0.1:5173/') //TODO: bring back to page refresh happened on
+})
+
+router.get('/logout', (req, res) => {
+    delete req.session.spotify_token
+    delete req.session.generatedState
+    delete req.session.codeVerifier
+    res.redirect('http://127.0.0.1:5173/')
 })
 
 module.exports = router
