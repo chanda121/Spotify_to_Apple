@@ -88,7 +88,7 @@ return(
                                 
                                 }
                                 <div className='content-center font-bold text-2xl'>
-                                    <span className="text-white/40 text-sm">#{index + 1}</span>
+                                    <span className="text-black/40 dark:text-white/40 text-sm">#{index + 1}</span>
                                     <div className="font-bold text-lg">{artist.name}</div>
                                 </div>
                                 
