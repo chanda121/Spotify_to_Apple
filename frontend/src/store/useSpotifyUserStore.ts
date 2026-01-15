@@ -71,7 +71,6 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
                 },
                 isLoadingUser: false
             })
-            console.log(get().user)
         } catch (error) {
             const errorMessage = error instanceof Error 
                 ? error.message
@@ -92,7 +91,6 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             if (!res.ok) throw new Error('Not authenticated')
             
             const data = await res.json()
-            console.log(data)
             const tracks: SpotifyTrack[] = data.items.map((track: SpotifyTrack) => ({
                 id: track.id,
                 uri: track.uri,
