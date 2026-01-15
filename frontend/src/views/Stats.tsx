@@ -16,6 +16,7 @@ export function Stats() {
     const topArtistsError = useSpotifyUserStore((state) => state.topArtistsError)
     const topArtistsLoading = useSpotifyUserStore((state) => state.isLoadingTopArtists)
 
+
 return(
     <div className='max-w-4xl mx-auto flex content-center flex-col space-y-5'>
         <div key='user-stats'>

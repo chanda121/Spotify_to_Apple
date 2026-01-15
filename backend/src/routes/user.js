@@ -4,8 +4,8 @@ const { check_access_token } = require('../utils/utils')
 
 const router = express.Router()
 
-router.get('/session', (req, res) => {
-    if (req.session.spotify_token) {
+router.get('/session', async (req, res) => {
+    if (req.session.spotify_token && await check_access_token(req)) {
         res.json({logged_in: true})
 
     } else {
