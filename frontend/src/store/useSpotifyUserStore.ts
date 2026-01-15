@@ -161,10 +161,16 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
         try {
             const userId = get().user?.userId
             if (!userId) throw new Error('User not loaded')
-            const res = await fetch(`/api/user/${userId}/playlists`, { credentials: 'include' })
+
+            const limit = 10
+            const offset = 0
+
+            const res = await fetch(`/api/user/${userId}/playlists?limit=${limit}&offset=${offset}`, { credentials: 'include' })
             if (!res.ok) throw new Error('Not authenticated')
             
             const data = await res.json()
+            console.log(data)
+
             const playlists = data.items.map((playlist: PlaylistApi) => ({
                 id: playlist.id,
                 uri: playlist.uri,
@@ -174,7 +180,6 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             }))
             
             set({ playlists:playlists, isLoadingPlaylists: false })
-            console.log(get().playlists)
         } catch (error) {
             const errorMessage = error instanceof Error
                 ? error.message

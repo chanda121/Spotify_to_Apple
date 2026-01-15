@@ -95,7 +95,19 @@ router.get('/:id/playlists', async (req, res) => {
             headers: { 'Authorization': `Bearer ${access_token}` }
         })
 
-        const data = await response.json()
+        const initData = await response.json()
+
+        jsonResponse = initData.
+
+        while (initData.next) {
+            response = await fetch(initData.next, {
+                method: 'GET', headers: { 'Authorization': `Bearer ${access_token}` }
+            })
+            const initData = await response.json()
+
+        }
+
+        console.log(data)
         
         res.json(data)
     } catch (error) {

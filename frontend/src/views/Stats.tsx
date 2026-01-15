@@ -16,11 +16,14 @@ export function Stats() {
     const topArtistsError = useSpotifyUserStore((state) => state.topArtistsError)
     const topArtistsLoading = useSpotifyUserStore((state) => state.isLoadingTopArtists)
 
+    const fetchPlaylists = useSpotifyUserStore((state) => state.fetchPlaylists)
+
 
 return(
     <div className='max-w-4xl mx-auto flex content-center flex-col space-y-5'>
         <div key='user-stats'>
             <h1 className="text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20">Stats here</h1>
+            <button onClick={fetchPlaylists}>fetch playlist</button>
             {!userLoading &&
                 <div>
                     {user && 
