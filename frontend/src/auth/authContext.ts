@@ -3,7 +3,7 @@ import { createContext, useContext } from 'react'
 type AuthContextType = {
     status: 'logged_in' | 'logged_out' | 'loading',
     login: () => void,
-    logout: () => void
+    logout: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextType | undefined>(undefined)

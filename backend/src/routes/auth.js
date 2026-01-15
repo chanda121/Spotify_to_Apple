@@ -41,7 +41,9 @@ router.get('/', (req, res) => {
     const codeChallenge = generateCodeChallenge(req.session.codeVerifier)
 
     const scope = `user-read-private user-read-email user-read-playback-state user-modify-playback-state 
-                 user-read-currently-playing streaming user-top-read user-read-playback-position playlist-read-private`
+                 user-read-currently-playing user-library-read
+                 streaming user-top-read user-read-playback-position 
+                 playlist-read-private playlist-read-collaborative`
 
     const params = new URLSearchParams({
         client_id: client_id,
@@ -53,7 +55,7 @@ router.get('/', (req, res) => {
         code_challenge: codeChallenge
     })
 
-    res.redirect('https://accounts.spotify.com/authorize?' + params.toString())
+    res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`)
 })
 
 router.get('/callback', async (req, res) => {
@@ -63,12 +65,12 @@ router.get('/callback', async (req, res) => {
 
     if (state === null || state !== req.session.generatedState) {
         const errorParams = new URLSearchParams({ error: 'state_mismatch' })
-        return res.redirect('/?' + errorParams.toString())
+        return res.redirect(`/?${errorParams.toString()}`)
     }
 
     if (err != null) {
         const errorParams = new URLSearchParams({ error: err })
-        return res.redirect('/?' + errorParams.toString())
+        return res.redirect(`/?${errorParams.toString()}`)
     }
 
     try {
@@ -90,7 +92,7 @@ router.get('/callback', async (req, res) => {
 
         if (data.error) {
             const errorParams = new URLSearchParams({ error: data.error })
-            return res.redirect('/?' + errorParams.toString())
+            return res.redirect(`/?${errorParams.toString()}`)
         }
         
         req.session.spotify_token = {
@@ -116,7 +118,7 @@ router.get('/refresh_token', async (req, res) => {
     if (!success) {
         return res.status(401).json({ ok: false })
     }
-    res.redirect('http://127.0.0.1:5173/') //TODO: bring back to page refresh happened on
+    res.redirect(process.env.FRONTEND_URL) //TODO: bring back to page refresh happened on
 })
 
 router.get('/logout', (req, res) => {

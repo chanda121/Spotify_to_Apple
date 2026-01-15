@@ -12,7 +12,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 app.use(session({
-    secret: 'test',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false }
@@ -20,7 +20,7 @@ app.use(session({
 
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
-app.get("/", (req, res) => {
+app.get('/', (req, res) => {
     res.send('Hello World')
 })
 
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 app.use((err, req, res, next) => {
     console.error(err)
     res.status(err.status || 500);
-    res.json(err.status==404 ? {"error":{"message": "Not Found"}} : {"error":{"message": "Internal Server Error"}})
+    res.json(err.status==404 ? { error: { message: 'Not Found' } } : { error: { message: 'Internal Server Error' } })
 })
 
 app.listen(port, () => {

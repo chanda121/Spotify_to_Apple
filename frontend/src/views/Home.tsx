@@ -3,6 +3,8 @@ import { useAuth } from '../auth/authContext'
 export function Home() {
     const { status, login } = useAuth()
 
+    
+
 return (
     <div className='text-center'>
         <h1 className='mb-4'>Landing!!</h1>

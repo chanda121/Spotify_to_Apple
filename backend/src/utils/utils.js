@@ -1,5 +1,8 @@
+
+const createError = require('http-errors')
+
 const refresh_token = async (req) => {
-    const refresh_token = req.session.spotify_token ? req.session.spotify_token.refresh_token : null
+    const refreshTokenVal = req.session.spotify_token ? req.session.spotify_token.refresh_token : null
 
     try {
         const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
@@ -10,7 +13,7 @@ const refresh_token = async (req) => {
             body: new URLSearchParams({
                 client_id: process.env.SPOTIFY_CLIENT_ID,
                 grant_type: 'refresh_token',
-                refresh_token: refresh_token
+                refresh_token: refreshTokenVal
             })
         })
 
@@ -32,4 +35,24 @@ const refresh_token = async (req) => {
 
 }
 
-module.exports = { refresh_token }
+/**
+ * Check if access token exists/expired
+ * refreshes token if expired
+ * @param {*} req 
+ * 
+ * throws error if it doesn't exist, returns false if token can't be refreshed, true otherwise
+ */
+const check_access_token = async (req) => {
+    if (!req.session.spotify_token) {
+        throw createError(401)
+    }
+    if (Date.now() > req.session.spotify_token.expires_datetime) {
+        const success = await refresh_token(req)
+        if (!success) {
+            return false
+        }
+    }
+    return true
+}
+
+module.exports = { refresh_token, check_access_token }
