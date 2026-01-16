@@ -59,16 +59,9 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             const res = await fetch('/api/user/user-info', { credentials: 'include' })
             if (!res.ok) throw new Error('Not authenticated')
 
-            const data = await res.json()
+            const data: SpotifyUser = await res.json()
             set({
-                user: {
-                    userId: data.id,
-                    email: data.email,
-                    display_name: data.display_name,
-                    images: data.images ?? [],
-                    country: data.country,
-                    product: data.product,
-                },
+                user: data,
                 isLoadingUser: false
             })
         } catch (error) {
@@ -90,26 +83,9 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             const res = await fetch('/api/user/top-tracks', { credentials: 'include' })
             if (!res.ok) throw new Error('Not authenticated')
             
-            const data = await res.json()
-            const tracks: SpotifyTrack[] = data.items.map((track: SpotifyTrack) => ({
-                id: track.id,
-                uri: track.uri,
-                name: track.name,
-                duration_ms: track.duration_ms,
-                artists: track.artists.map((artist: Artist) => ({
-                    id: artist.id,
-                    uri: artist.uri,
-                    name: artist.name,
-                })),
-                album: {
-                    id: track.album.id,
-                    uri: track.album.uri,
-                    name: track.album.name,
-                    release_date: track.album.release_date,
-                    total_tracks: track.album.total_tracks
-                }
-            }))
-            set({topTracks: tracks, isLoadingTopTracks: false})
+            const data: SpotifyTrack[] = await res.json()
+
+            set({topTracks: data, isLoadingTopTracks: false})
         } catch (error) {
             const errorMessage = error instanceof Error
                 ? error.message
@@ -129,20 +105,9 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             const res = await fetch('/api/user/top-artists', { credentials: 'include' })
             if (!res.ok) throw new Error('Not authenticated')
             
-            const data = await res.json()
+            const data: Artist[] = await res.json()
 
-            const artists = data.items.map((artist:Artist) => ({
-                id: artist.id,
-                uri: artist.uri,
-                name: artist.name,
-                images: artist.images?.map((image:Image) => ({
-                    url: image.url,
-                    height: image.height,
-                    width: image.width
-                }))
-            }))
-
-            set({topArtists:artists, isLoadingTopArtists: false})
+            set({topArtists:data, isLoadingTopArtists: false})
         } catch (error) {
             const errorMessage = error instanceof Error
                 ? error.message
@@ -171,15 +136,7 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             const data = await res.json()
             console.log(data)
 
-            const playlists = data.map((playlist: PlaylistApi) => ({
-                id: playlist.id,
-                uri: playlist.uri,
-                name: playlist.name,
-                ownerId: playlist.owner.id,
-                tracksHref: playlist.tracks.href
-            }))
-            
-            set({ playlists:playlists, isLoadingPlaylists: false })
+            set({ playlists:data, isLoadingPlaylists: false })
         } catch (error) {
             const errorMessage = error instanceof Error
                 ? error.message

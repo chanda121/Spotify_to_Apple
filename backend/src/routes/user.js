@@ -26,7 +26,16 @@ router.get('/user-info', async (req, res) => {
         })
 
         const data = await response.json()
-        res.json(data)
+
+        const user = {
+            userId: data.id,
+            email: data.email,
+            display_name: data.display_name,
+            images: data.images ?? [],
+            country: data.country,
+            product: data.product,
+        }
+        res.json(user)
     } catch (error) {
         console.error(`get email error: ${error}`)
         return res.status(500).json({ error: 'Failed to get email'})
@@ -50,8 +59,26 @@ router.get('/top-tracks', async (req, res) => {
         })
 
         const data = await response.json()
+        const tracks = data.items.map((track) => ({
+            id: track.id,
+            uri: track.uri,
+            name: track.name,
+            duration_ms: track.duration_ms,
+            artists: track.artists.map((artist) => ({
+                id: artist.id,
+                uri: artist.uri,
+                name: artist.name,
+            })),
+            album: {
+                id: track.album.id,
+                uri: track.album.uri,
+                name: track.album.name,
+                release_date: track.album.release_date,
+                total_tracks: track.album.total_tracks
+            }
+        }))
         
-        res.json(data)
+        res.json(tracks)
     } catch (error) {
         console.error(`get query error (top tracks): ${error}`)
         return res.status(500).json({ error: 'Failed to get query'})
@@ -73,8 +100,19 @@ router.get('/top-artists', async (req, res) => {
         })
 
         const data = await response.json()
+
+        const artists = data.items.map((artist) => ({
+            id: artist.id,
+            uri: artist.uri,
+            name: artist.name,
+            images: artist.images?.map((image) => ({
+                url: image.url,
+                height: image.height,
+                width: image.width
+            }))
+        }))
         
-        res.json(data)
+        res.json(artists)
     } catch (error) {
         console.error(`get query error (top artists): ${error}`)
         return res.status(500).json({ error: 'Failed to get query'})
@@ -106,8 +144,13 @@ router.get('/:id/playlists', async (req, res) => {
             jsonResponse = jsonResponse.concat(initData.items)
         }
 
-        //console.log('FINAL JSON RESPONSE: ',jsonResponse)
-        console.log(`num items: ${jsonResponse.length}`)
+        jsonResponse = jsonResponse.map((playlist) => ({
+                id: playlist.id,
+                uri: playlist.uri,
+                name: playlist.name,
+                ownerId: playlist.owner.id,
+                tracksHref: playlist.tracks.href
+            }))
 
         res.json(jsonResponse)
     } catch (error) {

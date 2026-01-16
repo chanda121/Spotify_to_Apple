@@ -13,17 +13,6 @@ export interface Playlist {
     ownerId: string,
     tracksHref: string
 }
-export interface PlaylistApi {
-    id: string,
-    uri: string,
-    name: string,
-    owner:{
-        id: string  // Changed from number
-    }
-    tracks: {
-        href: string
-    }
-}
 export interface Image {
     url: string,
     height: number,
