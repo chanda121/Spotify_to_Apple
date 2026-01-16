@@ -171,7 +171,7 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             const data = await res.json()
             console.log(data)
 
-            const playlists = data.items.map((playlist: PlaylistApi) => ({
+            const playlists = data.map((playlist: PlaylistApi) => ({
                 id: playlist.id,
                 uri: playlist.uri,
                 name: playlist.name,

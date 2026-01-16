@@ -44,7 +44,7 @@ const refresh_token = async (req) => {
  */
 const check_access_token = async (req) => {
     if (!req.session.spotify_token) {
-        throw createError(401)
+        return next(createError(401, 'no spotify token!!'))
     }
     if (Date.now() > req.session.spotify_token.expires_datetime) {
         const success = await refresh_token(req)

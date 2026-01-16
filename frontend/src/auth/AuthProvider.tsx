@@ -20,7 +20,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     //set status here
     useEffect( () => {
-
         const check_session = async () => {
             const response = await fetch('/api/user/session')
             const data = await response.json()

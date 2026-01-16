@@ -90,26 +90,26 @@ router.get('/:id/playlists', async (req, res) => {
     const limit = Number(req.query.limit) || 50
     const offset = Number(req.query.offset) || 0
     try {
-        const response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists?limit=${limit}&offset=${offset}`, {
+        let response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists?limit=${limit}&offset=${offset}`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${access_token}` }
         })
 
-        const initData = await response.json()
-
-        jsonResponse = initData.
+        let initData = await response.json()
+        let jsonResponse = initData.items
 
         while (initData.next) {
             response = await fetch(initData.next, {
                 method: 'GET', headers: { 'Authorization': `Bearer ${access_token}` }
             })
-            const initData = await response.json()
-
+            initData = await response.json()
+            jsonResponse = jsonResponse.concat(initData.items)
         }
 
-        console.log(data)
-        
-        res.json(data)
+        //console.log('FINAL JSON RESPONSE: ',jsonResponse)
+        console.log(`num items: ${jsonResponse.length}`)
+
+        res.json(jsonResponse)
     } catch (error) {
         console.error(`get query error (playlists): ${error}`)
         return res.status(500).json({ error: 'Failed to get query'})
@@ -131,7 +131,7 @@ router.get('/saved-songs', async (req, res) => {
         })
 
         const data = await response.json()
-        
+
         res.json(data)
     } catch (error) {
         console.error(`get query error (playlists): ${error}`)
