@@ -1,6 +1,6 @@
 import './App.css'
 import { Header } from './components/Header'
-import { Home, About, Stats, Transfer } from './views'
+import { Home, About, Stats, Transfer, Backdrop } from './views'
 import { ProtectedRoute } from './auth/ProtectedRoute'
 
 import { BrowserRouter, Route, Routes } from 'react-router-dom'
@@ -21,6 +21,11 @@ return (
 				<ProtectedRoute>
 					<Transfer />
 				</ProtectedRoute> 
+			} />
+			<Route path='backdrop' element={
+				<ProtectedRoute>
+					<Backdrop/>
+				</ProtectedRoute>
 			} />
 			<Route path='/about' element={<About />} />
       	</Routes>

@@ -121,6 +121,14 @@ router.get('/refresh_token', async (req, res) => {
     res.redirect(process.env.FRONTEND_URL) //TODO: bring back to page refresh happened on
 })
 
+router.get('/token', (req, res) => {
+    res.json(
+        {
+            access_token: req.session.spotify_token ? req.session.spotify_token.access_token : null
+        }
+    )
+})
+
 router.get('/logout', (req, res) => {
     delete req.session.spotify_token
     delete req.session.generatedState

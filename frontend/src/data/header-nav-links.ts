@@ -14,6 +14,10 @@ export const headerNavItems: NavItem[] = [{
     link: '/transfer-playlist'
 }, {
     id: 2,
+    label: 'Backdrop',
+    link: '/backdrop'
+}, {
+    id:3,
     label: 'About',
     link: '/about'
 }]
