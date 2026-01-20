@@ -1,0 +1,42 @@
+const express = require('express')
+
+const { check_access_token } = require('../utils/utils')
+
+const router = express.Router()
+
+router.put('/transfer-playback', async (req, res) => {
+    if (!await check_access_token(req)) {
+        return res.status(401).json({ ok: false })
+    }
+    const access_token = req.session.spotify_token.access_token
+
+    const device_id = req.query.device_id
+    const play = req.query.play === 'true'
+
+    try {
+        const response = await fetch('https://api.spotify.com/v1/me/player', {
+            method: 'PUT',
+            headers: { 
+                'Authorization': `Bearer ${access_token}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                device_ids: [device_id],
+                play: play
+            })
+        })
+
+        if (response.status === 204) {
+            return res.json({ ok: true })
+        }
+        
+        const data = await response.json()
+        console.log(data)
+        res.status(response.status).json(data)
+    } catch (error) {
+        console.error(`transfer playback error: ${error}`)
+        return res.status(500).json({ error: 'Failed to transfer playback'})
+    }
+})
+
+module.exports = router

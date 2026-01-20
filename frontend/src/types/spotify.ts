@@ -78,3 +78,15 @@ export interface WebPlaybackState {
         next_tracks: WebPlaybackTrack[]
     }
 }
+
+export interface SpotifyPlayer {
+    addListener: (event: string, callback: (data: unknown) => void) => void
+    connect: () => Promise<boolean>
+    disconnect: () => void
+    togglePlay: () => Promise<void>
+    previousTrack: () => Promise<void>
+    nextTrack: () => Promise<void>
+    getVolume: () => Promise<number>
+    setVolume: (volume:number) => Promise<void>
+    getCurrentState: () => Promise<WebPlaybackState | null>
+}

@@ -6,6 +6,7 @@ const createError = require('http-errors')
 
 const userRouter = require('./routes/user')
 const authRouter = require('./routes/auth')
+const spotifyPlayerRouter = require('./routes/spotifyPlayer')
 
 const app = express()
 
@@ -20,11 +21,14 @@ app.use(session({
 
 app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
+app.use('/api/spotify-player', spotifyPlayerRouter)
+
 app.get('/', (req, res) => {
     res.send('Hello World')
 })
 
 app.use((req, res, next) => {
+    console.log(`404 for ${req.originalUrl}`)
     next(createError(404))
 })
 //error handler

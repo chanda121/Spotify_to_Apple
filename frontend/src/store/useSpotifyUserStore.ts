@@ -2,10 +2,8 @@ import { create } from 'zustand'
 import type {
   SpotifyUser,
   Playlist,
-  PlaylistApi,
   Artist,
   SpotifyTrack,
-  Image
 } from '../types/spotify'
 
 interface SpotifyUserStore {
