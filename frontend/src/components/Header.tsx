@@ -35,13 +35,13 @@ export function Header() {
 
 
 	const listItemsNav = headerNavItems.map(nav_item => 
-		<Link onClick={closeHamburger} className='header-nav-link' key={nav_item.id} to={nav_item.link}>{nav_item.label}</Link>
+		<Link onClick={closeHamburger} className='header-nav-link mx-1' key={nav_item.id} to={nav_item.link}>{nav_item.label}</Link>
 	)
 	let listItems = null
 	
 	if (status === 'logged_in') {
 		listItems = [...listItemsNav, 
-			<button key='logout-button' className='text-sm py-0.5 'onClick={logout}>Logout</button>
+			<button key='logout-button' className='mx-1' onClick={logout}>Logout</button>
 		]		
 	} else {
 		listItems = [...listItemsNav]

@@ -61,13 +61,14 @@ button {
   border: 1px solid var(--color-border);
   padding: 0.3em 0.6em;
   font-size: 1em;
-  font-weight: 500;
   font-family: inherit;
   background-color: var(--color-bg);
   color: var(--color-text);
   cursor: pointer;
   transition: border-color 0.25s;
   text-align: center;
+  box-sizing: border-box;
+  line-height: 1
 }
 button:hover {
   border-color: var(--color-accent);
@@ -84,32 +85,32 @@ button:focus-visible {
 .header {
   display: flex;
   padding: 0.5rem 0.25rem;
-  justify-content: space-between;
   align-items: center;
 }
 
 .header-menu-items {
   display: flex;
   flex-direction: row;
-  align-items: center;
-  font-size: 1em;
 }
 
 .header-nav-link {
+  display: inline-block;
   text-align: center;
   padding: 0.3em 0.6em;
   border: 1px solid var(--color-border);
-  border-radius: 1px;
+  border-radius: 5px;
 
   font-family: inherit;
   background-color: var(--color-bg);
   color: var(--color-text);
-  
+  box-sizing: border-box;
+  line-height: 1;
 }
 
 .logo {
   font-size: 2.2em;
   color: var(--color-text);
+  margin-right: auto;
 }
 
 .dropdown {
