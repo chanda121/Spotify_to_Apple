@@ -30,7 +30,8 @@ interface SpotifyUserStore {
     fetchTopTracks: () => Promise<void>,
     fetchTopArtists: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
-    clearErrors: () => void
+    clearErrors: () => void,
+    reset: () => void
 }
 
 export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
@@ -155,7 +156,22 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             topArtistsError: null,
             playlistsError: null
         })
+    },
+
+    reset: () => {
+        set({
+            user: null,
+            topTracks: [],
+            topArtists: [],
+            playlists: [],
+            isLoadingUser: false,
+            isLoadingTopTracks: false,
+            isLoadingTopArtists: false,
+            isLoadingPlaylists: false,
+            userError: null,
+            topTracksError: null,
+            topArtistsError: null,
+            playlistsError: null
+        })
     }
-
-
 }))

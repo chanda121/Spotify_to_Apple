@@ -52,8 +52,6 @@ export function Backdrop() {
         script.src = 'https://sdk.scdn.co/spotify-player.js'
         script.async = true
 
-
-
         document.body.appendChild(script)
         
         window.onSpotifyWebPlaybackSDKReady = () => {
@@ -65,9 +63,14 @@ export function Backdrop() {
                         const data = await res.json()
                         if (data.access_token) {
                             cb(data.access_token)
+                        } else {
+                            // Token expired or not authenticated - show error
+                            console.error('No valid token available:', data.error)
+                            setError('Session expired. Please log in again.')
                         }
                     } catch (err) {
                         console.error('Failed to get token:', err)
+                        setError('Failed to authenticate with Spotify')
                     }
                 },
                 volume: 0.5

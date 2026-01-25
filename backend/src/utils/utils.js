@@ -1,6 +1,4 @@
 
-const createError = require('http-errors')
-
 const refresh_token = async (req) => {
     const refreshTokenVal = req.session.spotify_token ? req.session.spotify_token.refresh_token : null
 
@@ -40,11 +38,11 @@ const refresh_token = async (req) => {
  * refreshes token if expired
  * @param {*} req 
  * 
- * throws error if it doesn't exist, returns false if token can't be refreshed, true otherwise
+ * returns false if no token exists or token can't be refreshed, true otherwise
  */
 const check_access_token = async (req) => {
     if (!req.session.spotify_token) {
-        return next(createError(401, 'no spotify token!!'))
+        return false
     }
     if (Date.now() > req.session.spotify_token.expires_datetime) {
         const success = await refresh_token(req)

@@ -5,8 +5,11 @@ import { useSpotifyUserStore } from '../store/useSpotifyUserStore'
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [status, setStatus] = useState<'logged_in' | 'logged_out' | 'loading'>('loading')
 
-    const logout = async () => {
+    const resetStore = useSpotifyUserStore((state) => state.reset)
+
+    const logout = async (): Promise<void> => {
         await fetch('/api/auth/logout')
+        resetStore() // Clear all cached data
         setStatus('logged_out')
         window.location.href = 'http://127.0.0.1:5173/'
     }
@@ -26,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             if (data.logged_in) {
                 setStatus('logged_in')
             } else {
+                resetStore() // Clear stale data when session expires
                 setStatus('logged_out')
             }
         }
@@ -35,7 +39,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return () => {
             window.removeEventListener('focus', check_session)
         }
-    }, [])
+    }, [resetStore])
 
     // Fetch user data once when logged in
     useEffect(() => {

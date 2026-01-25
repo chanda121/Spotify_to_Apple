@@ -1,7 +1,7 @@
 const express = require('express')
 const crypto = require('crypto')
 
-const { refresh_token } = require('../utils/utils')
+const { refresh_token, check_access_token } = require('../utils/utils')
 
 const router = express.Router()
 
@@ -121,12 +121,12 @@ router.get('/refresh_token', async (req, res) => {
     res.redirect(process.env.FRONTEND_URL) //TODO: bring back to page refresh happened on
 })
 
-router.get('/token', (req, res) => {
-    res.json(
-        {
-            access_token: req.session.spotify_token ? req.session.spotify_token.access_token : null
-        }
-    )
+router.get('/token', async (req, res) => {
+    if (!await check_access_token(req)) {
+        return res.status(401).json({ access_token: null, error: 'not_authenticated' })
+    }
+    
+    res.json({ access_token: req.session.spotify_token.access_token })
 })
 
 router.get('/logout', (req, res) => {
