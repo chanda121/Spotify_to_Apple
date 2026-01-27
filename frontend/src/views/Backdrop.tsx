@@ -30,6 +30,15 @@ export function Backdrop() {
         player?.setVolume(volume)
     }
 
+    const dummy = async () => {
+        try{
+            const res = await fetch(`/api/spotify-player/get_playback_state`, { credentials: 'include' })
+            console.log(res)
+        } catch (error) {
+            console.error(`there was error: ${error}`)
+        }
+    }
+
     const changePlayback = async () => {
         try {
             const res = await fetch(`/api/spotify-player/transfer-playback?device_id=${deviceId}&play=${true}`, { 
@@ -134,7 +143,7 @@ export function Backdrop() {
                 <div>
                     <h1>Spotify Web Player</h1> 
                     <div>device id: {deviceId}</div>
-                    <button onClick={changePlayback}>Start playback?</button>
+                    <button onClick={dummy}>Start playback?</button>
                     {player &&
                         <div className='outline-2'>
                             <div className='flex flex-col items-center'>

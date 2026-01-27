@@ -48,7 +48,7 @@ router.get('/top-tracks', async (req, res) => {
         return res.status(401).json({ ok: false })
     }
     const access_token = req.session.spotify_token.access_token
-    const time_range = req.query.time_range || 'long_term'
+    const time_range = req.query.time_range || 'short_term'
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
 
@@ -90,7 +90,7 @@ router.get('/top-artists', async (req, res) => {
         return res.status(401).json({ ok: false })
     }
     const access_token = req.session.spotify_token.access_token
-    const time_range = req.query.time_range || 'long_term'
+    const time_range = req.query.time_range || 'short_term'
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
     try {

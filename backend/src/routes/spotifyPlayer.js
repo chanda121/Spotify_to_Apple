@@ -39,4 +39,36 @@ router.put('/transfer-playback', async (req, res) => {
     }
 })
 
+router.get('/get_playback_state', async (req, res) => {
+    if (!await check_access_token(req)) {
+        return res.status(401).json({ ok: false })
+    }
+    const access_token = req.session.spotify_token.access_token
+
+    try {
+        const response = await fetch('https://api.spotify.com/v1/me/player', {
+            method: 'GET',
+            headers: { 'Authorization': `Bearer ${access_token}`},
+        })
+
+        const data = await response.json()
+
+        playbackState = {
+            device_id: data.device.id,
+            volume_percent: data.device.volume_percent,
+            shuffle_state: data.shuffle_state,
+            smart_shuffle: data.smart_shuffle,
+            repeat_state: data.repeat_state,
+            progress_ms: data.progress_ms,
+            
+        }
+        console.log(data)
+        console.log(structured_data)
+        res.json(structured_data)
+    } catch (error) {
+        console.log(`get playback state error: ${error}`)
+        return res.status(500).json({ error: 'Failed to get playback state'})
+    }
+})
+
 module.exports = router
