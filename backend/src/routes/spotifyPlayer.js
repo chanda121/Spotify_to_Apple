@@ -71,4 +71,25 @@ router.get('/get_playback_state', async (req, res) => {
     }
 })
 
+router.get('/get_current_track', async (req, res) => {
+    if( !await check_access_token(req)) {
+        return res.status(401).json({ ok: false })
+    }
+    access_token = res.session.spotify_token.access_token
+
+    try {
+        const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
+            method: 'GET',
+            headers: {'Authorization': `Bearer: ${access_token}`}
+        })
+
+        const data = await response.json()
+        
+
+    } catch (error) {
+        console.error(`Error while getting current playback track: ${error}`)
+        return res.status(500).json({ error: 'Failed to get playback track'})
+    }
+})
+
 module.exports = router
