@@ -60,7 +60,6 @@ router.get('/get_playback_state', async (req, res) => {
             smart_shuffle: data.smart_shuffle,
             repeat_state: data.repeat_state,
             progress_ms: data.progress_ms,
-            
         }
         console.log(data)
         console.log(structured_data)

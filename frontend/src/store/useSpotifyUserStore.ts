@@ -1,4 +1,8 @@
 import { create } from 'zustand'
+import type { StoreApi } from 'zustand'
+
+type SetState = StoreApi<SpotifyUserState & spotifyUserAction>['setState']
+
 import type {
   SpotifyUser,
   Playlist,
@@ -6,7 +10,7 @@ import type {
   SpotifyTrack,
 } from '../types/spotify'
 
-interface SpotifyUserStore {
+interface SpotifyUserState {
     // Data
     user: SpotifyUser | null,
     topTracks: SpotifyTrack[],
@@ -24,8 +28,9 @@ interface SpotifyUserStore {
     topTracksError: string | null,
     topArtistsError: string | null,
     playlistsError: string | null,
+}
 
-    // Actions
+interface spotifyUserAction {
     fetchUser: () => Promise<void>,
     fetchTopTracks: () => Promise<void>,
     fetchTopArtists: () => Promise<void>,
@@ -34,13 +39,46 @@ interface SpotifyUserStore {
     reset: () => void
 }
 
-export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
+const fetchWithAuth = async <T>(url: string): Promise<T> => {
+    
+    const res = await fetch(url, { credentials: 'include' })
+
+    if(!res.ok) {
+        const msg = res.status === 401 ? 'Not authenticated' : `Request failed (${res.status})`
+        throw new Error(msg)
+    }
+
+    return res.json() as Promise<T>
+}
+
+const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn }: 
+    {
+        set: SetState
+        loadingKey: string
+        errorKey: string
+        onSuccess: (data: T) => void
+        asyncFn: () => Promise<T>
+    }) => {
+        set({ [loadingKey]: true, [errorKey]: null })
+        try {
+            const data = await asyncFn()
+            onSuccess(data)
+        } catch (error) {
+            const msg = error instanceof Error ? error.message : 'Unexpected Error'
+            set({ [errorKey]: msg })
+            console.error(error)
+        } finally {
+            set({ [loadingKey]: false })
+        }
+    }
+
+export const useSpotifyUserStore = create<SpotifyUserState & spotifyUserAction>((set, get) => ({
     user: null,
     topTracks: [],
     topArtists: [],
     playlists: [],
 
-        // Loading states
+    // Loading states
     isLoadingUser: false,
     isLoadingTopTracks: false,
     isLoadingTopArtists: false,
@@ -130,7 +168,10 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
             const offset = 0
 
             const res = await fetch(`/api/user/${userId}/playlists?limit=${limit}&offset=${offset}`, { credentials: 'include' })
-            if (!res.ok) throw new Error('Not authenticated')
+            if (!res.ok) {
+                const msg = res.status === 401 ? 'Not authenticated' : `Request failed (${res.status})`
+                throw new Error(msg)
+            }
             
             const data = await res.json()
             console.log(data)
@@ -175,3 +216,5 @@ export const useSpotifyUserStore = create<SpotifyUserStore>((set, get) => ({
         })
     }
 }))
+
+
