@@ -1,8 +1,5 @@
 import { create } from 'zustand'
 import type { StoreApi } from 'zustand'
-
-type SetState = StoreApi<SpotifyUserState & spotifyUserAction>['setState']
-
 import type {
   SpotifyUser,
   Playlist,
@@ -29,8 +26,7 @@ interface SpotifyUserState {
     topArtistsError: string | null,
     playlistsError: string | null,
 }
-
-interface spotifyUserAction {
+interface SpotifyUserAction {
     fetchUser: () => Promise<void>,
     fetchTopTracks: () => Promise<void>,
     fetchTopArtists: () => Promise<void>,
@@ -38,6 +34,7 @@ interface spotifyUserAction {
     clearErrors: () => void,
     reset: () => void
 }
+type SetState = StoreApi<SpotifyUserState & SpotifyUserAction>['setState']
 
 const fetchWithAuth = async <T>(url: string): Promise<T> => {
     
@@ -72,7 +69,7 @@ const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn 
         }
     }
 
-export const useSpotifyUserStore = create<SpotifyUserState & spotifyUserAction>((set, get) => ({
+export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>((set, get) => ({
     user: null,
     topTracks: [],
     topArtists: [],
@@ -91,103 +88,52 @@ export const useSpotifyUserStore = create<SpotifyUserState & spotifyUserAction>(
     playlistsError: null,
 
     fetchUser: async () => {
-        set({ isLoadingUser: true, userError: null })
-        try {
-            const res = await fetch('/api/user/user-info', { credentials: 'include' })
-            if (!res.ok) throw new Error('Not authenticated')
-
-            const data: SpotifyUser = await res.json()
-            set({
-                user: data,
-                isLoadingUser: false
-            })
-        } catch (error) {
-            const errorMessage = error instanceof Error 
-                ? error.message
-                : 'Failed to fetch user data'
-            set({
-                userError: errorMessage,
-                isLoadingUser: false,
-                user: null
-            })
-            console.error(`fetch user error: ${error}`)
-        }
+        await runAsyncAction({
+            set,
+            loadingKey: 'isLoadingUser',
+            errorKey: 'userError',
+            onSuccess: (data: SpotifyUser) => {
+                set({ user: data })
+            },
+            asyncFn: () => fetchWithAuth<SpotifyUser>('/api/user/user-info')
+        })
     },
 
     fetchTopTracks: async () => {
-        set({ isLoadingTopTracks: true, topTracksError: null })
-        try {
-            const res = await fetch('/api/user/top-tracks', { credentials: 'include' })
-            if (!res.ok) throw new Error('Not authenticated')
-            
-            const data: SpotifyTrack[] = await res.json()
-
-            set({topTracks: data, isLoadingTopTracks: false})
-        } catch (error) {
-            const errorMessage = error instanceof Error
-                ? error.message
-                : 'Failed to fetch user top tracks'
-            set({
-                topTracksError: errorMessage,
-                isLoadingTopTracks: false,
-                topTracks: []
-            })
-            console.error(`fetchTopTracks error: ${error}`)
-        }
+        await runAsyncAction({
+            set,
+            loadingKey: 'isLoadingTopTracks',
+            errorKey: 'topTracksError',
+            onSuccess: (data: SpotifyTrack[]) => {
+                set({ topTracks: data })
+            },
+            asyncFn: () => fetchWithAuth<SpotifyTrack[]>('/api/user/top-tracks')
+        })
     },
 
     fetchTopArtists: async () => {
-        set({ isLoadingTopArtists: true, topArtistsError: null })
-        try {
-            const res = await fetch('/api/user/top-artists', { credentials: 'include' })
-            if (!res.ok) throw new Error('Not authenticated')
-            
-            const data: Artist[] = await res.json()
-
-            set({topArtists:data, isLoadingTopArtists: false})
-        } catch (error) {
-            const errorMessage = error instanceof Error
-                ? error.message
-                : 'Failed to fetch user top artists'
-            set({
-                topArtistsError: errorMessage,
-                isLoadingTopArtists: false,
-                topArtists: []
-            })
-            console.error(`fetchTopArtists error: ${error}`)
-        }
+        await runAsyncAction({
+            set,
+            loadingKey: 'isLoadingTopArtists',
+            errorKey: 'topArtistsError',
+            onSuccess: (data: Artist[]) => {set({ topArtists: data })},
+            asyncFn: () => fetchWithAuth<Artist[]>('/api/user/top-artists')
+        })
     },
 
     fetchPlaylists: async () => {
-        set({ isLoadingPlaylists: true, playlistsError: null })
-        try {
-            const userId = get().user?.userId
-            if (!userId) throw new Error('User not loaded')
+        const userId = get().user?.userId
+        if (!userId) throw new Error('User not loaded')
 
-            const limit = 10
-            const offset = 0
-
-            const res = await fetch(`/api/user/${userId}/playlists?limit=${limit}&offset=${offset}`, { credentials: 'include' })
-            if (!res.ok) {
-                const msg = res.status === 401 ? 'Not authenticated' : `Request failed (${res.status})`
-                throw new Error(msg)
-            }
-            
-            const data = await res.json()
-            console.log(data)
-
-            set({ playlists:data, isLoadingPlaylists: false })
-        } catch (error) {
-            const errorMessage = error instanceof Error
-                ? error.message
-                : 'Failed to fetch user playlists'
-            set({
-                playlistsError: errorMessage,
-                isLoadingPlaylists: false,
-                playlists: []
-            })
-            console.error(`fetchPlaylists error: ${error}`)
-        }
+        const limit = 10
+        const offset = 0
+        await runAsyncAction({
+            set,
+            loadingKey: 'isLoadingPlaylists',
+            errorKey: 'playlistsError',
+            onSuccess: (data: Playlist[]) => {set({ playlists: data })},
+            asyncFn: () => fetchWithAuth<Playlist[]>(`/api/user/${userId}/playlists?limit=${limit}&offset=${offset}`)
+        })
     },
     
     clearErrors: () => {
