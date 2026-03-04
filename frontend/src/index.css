@@ -106,6 +106,11 @@ button:focus-visible {
   line-height: 1;
 }
 
+.header-nav-link:hover {
+  border-color: var(--color-accent);
+  background-color: var(--color-bg-secondary);
+}
+
 .logo {
   font-size: 2.2em;
   margin-right: auto;

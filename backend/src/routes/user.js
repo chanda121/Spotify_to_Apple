@@ -6,7 +6,6 @@ const router = express.Router()
 
 router.get('/session', async (req, res) => {
     if (req.session.spotify_token && await check_access_token(req)) {
-        console.log('printing from session' + req.session.spotify_token)
         res.json({logged_in: true})
 
     } else {
