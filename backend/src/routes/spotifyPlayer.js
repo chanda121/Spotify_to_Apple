@@ -72,19 +72,38 @@ router.get('/get_playback_state', async (req, res) => {
 
 router.get('/get_current_track', async (req, res) => {
     if( !await check_access_token(req)) {
+        console.error('Unauthorized')
         return res.status(401).json({ ok: false })
     }
-    access_token = res.session.spotify_token.access_token
+    const access_token = req.session.spotify_token.access_token
 
     try {
         const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
             method: 'GET',
-            headers: {'Authorization': `Bearer: ${access_token}`}
+            headers: {'Authorization': `Bearer ${access_token}`}
         })
 
         const data = await response.json()
-        
 
+        currTrack = {
+            is_playing: data.is_playing,
+            name: data.item.name,
+            timestamp: data.timestamp,
+            progress_ms: data.progress_ms,
+            duration_ms: data.item.duration_ms,
+            type: data.currently_playing_type,
+            album: {
+                id: data.item.album.id,
+                uri: data.item.album.uri,
+                name: data.item.album.name,
+                release_date: data.item.album.release_date,
+                total_tracks: data.item.album.total_tracks,
+                images: data.item.album.images
+            }
+        }
+        console.log(currTrack)
+        console.log(currTrack.album.images)
+        res.json(currTrack)
     } catch (error) {
         console.error(`Error while getting current playback track: ${error}`)
         return res.status(500).json({ error: 'Failed to get playback track'})

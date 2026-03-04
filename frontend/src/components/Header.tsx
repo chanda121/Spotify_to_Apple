@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from "react"
+import { useState } from "react"
 import { ThemeToggle } from "./ThemeToggle"
 import { headerNavItems } from "../data/header-nav-links"
 import { Link } from "react-router-dom"
@@ -6,42 +6,20 @@ import { useAuth } from '../auth/authContext'
 
 export function Header() {
 	const [hamburgerOpen, setHamburgerOpen] = useState(false)
-	const dropdownRef = useRef<HTMLDivElement | null>(null)
 	const { status, logout } = useAuth()
 
-	const toggleHamburger = () => {
-		setHamburgerOpen(!hamburgerOpen)
-	}
 	const closeHamburger = () => {
 		setHamburgerOpen(false)
 	}
 
-	useEffect(() => {
-		if (!hamburgerOpen) return
-
-		const handleClickOutside = (event: MouseEvent) => {
-			if (!dropdownRef.current) return
-
-			if (!dropdownRef.current.contains(event.target as Node)) {
-				closeHamburger()
-			}
-		}
-		document.addEventListener('mousedown', handleClickOutside)
-
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside)
-		}
-	}, [hamburgerOpen])
-
-
 	const listItemsNav = headerNavItems.map(nav_item => 
-		<Link onClick={closeHamburger} className='header-nav-link mx-1' key={nav_item.id} to={nav_item.link}>{nav_item.label}</Link>
+		<Link onClick={closeHamburger} className='header-nav-link' key={nav_item.id} to={nav_item.link}>{nav_item.label}</Link>
 	)
 	let listItems = null
 	
 	if (status === 'logged_in') {
 		listItems = [...listItemsNav, 
-			<button key='logout-button' className='mx-1' onClick={logout}>Logout</button>
+			<button key='logout-button' onClick={logout}>Logout</button>
 		]		
 	} else {
 		listItems = [...listItemsNav]
@@ -59,8 +37,10 @@ return (
 		</nav>
 		<ThemeToggle/>
 	</div>
-	<div className='header-hamburger-button' ref={dropdownRef}>
-		<button onClick={toggleHamburger}>
+	<div className='header-hamburger-button' 
+		 onMouseEnter={()=>setHamburgerOpen(true)}
+		 onMouseLeave={()=>setHamburgerOpen(false)}>
+		<button>
 			Hamburger
 		</button>
 		{

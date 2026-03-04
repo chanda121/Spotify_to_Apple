@@ -42,6 +42,8 @@ const refresh_token = async (req) => {
  */
 const check_access_token = async (req) => {
     if (!req.session.spotify_token) {
+        console.log('spotify token doesnt exist')
+        console.log(req.session.spotify_token)
         return false
     }
     if (Date.now() > req.session.spotify_token.expires_datetime) {

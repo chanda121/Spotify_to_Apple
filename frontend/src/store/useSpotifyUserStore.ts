@@ -7,6 +7,8 @@ import type {
   SpotifyTrack,
 } from '../types/spotify'
 
+import { fetchWithAuth } from '../utils/api'
+
 interface SpotifyUserState {
     // Data
     user: SpotifyUser | null,
@@ -36,17 +38,6 @@ interface SpotifyUserAction {
 }
 type SetState = StoreApi<SpotifyUserState & SpotifyUserAction>['setState']
 
-const fetchWithAuth = async <T>(url: string): Promise<T> => {
-    
-    const res = await fetch(url, { credentials: 'include' })
-
-    if(!res.ok) {
-        const msg = res.status === 401 ? 'Not authenticated' : `Request failed (${res.status})`
-        throw new Error(msg)
-    }
-
-    return res.json() as Promise<T>
-}
 
 const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn }: 
     {
