@@ -1,18 +1,38 @@
 import { create } from 'zustand'
 import { fetchWithAuth } from '../utils/api'
-import type { 
-    WebPlaybackState, 
-    WebPlaybackTrack, 
+
+import type {
+    PlaybackSnapshot, 
 } from '../types/spotify'
 
+interface SpotifyPlayerState {
+    snapshot: PlaybackSnapshot | null,
+    local_progress_ms: number
 
-interface SpotifyPlayerStore {
-    currentTrack: WebPlaybackTrack,
-    currentPosition: 
+    isLoadingSnapshot: boolean,
+    snapshotError: string | null
+}
+interface SpotifyPlayerAction {
+    fetchSnapshot: () => Promise<void>
 }
 
-export const useSpotifyPlayerStore = create<SpotifyPlayerStore>((set, get) => ({
+export const useSpotifyPlayerStore = create<SpotifyPlayerState & SpotifyPlayerAction>((set, get) => ({
+    snapshot: null,
+    local_progress_ms: 0,
     
+    isLoadingSnapshot: false,
+    snapshotError: null,
 
-    
+    fetchSnapshot: async () => {
+        set({ isLoadingSnapshot: true, snapshotError: null })
+        try {
+            const data = await fetchWithAuth<PlaybackSnapshot>('/api/spotify-player/get_current_track')
+            set({ snapshot: data, local_progress_ms: data.progress_ms })
+        } catch (error) {
+            console.error(error)
+        } finally {
+            set({ isLoadingSnapshot: false })
+        }
+    }
 }))
+

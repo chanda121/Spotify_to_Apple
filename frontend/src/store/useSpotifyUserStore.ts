@@ -39,7 +39,7 @@ interface SpotifyUserAction {
 type SetState = StoreApi<SpotifyUserState & SpotifyUserAction>['setState']
 
 
-const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn }: 
+const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn}: 
     {
         set: SetState
         loadingKey: string

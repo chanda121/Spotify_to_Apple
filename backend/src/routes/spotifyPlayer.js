@@ -82,28 +82,57 @@ router.get('/get_current_track', async (req, res) => {
             method: 'GET',
             headers: {'Authorization': `Bearer ${access_token}`}
         })
+        if (response.status === 204) {
+            return res.json({
+                is_playing: false,
+                timestamp: Date.now(),
+                progress_ms: 0,
+                currently_playing_type: 'unknown',
+                item: null
+            })
+        }
+        if (!response.ok) {
+            const text = await response.text().catch(() => '')
+            console.error('Spotify error: ', response.status, text)
+            return res.status(response.status).json({
+                error: 'Spotify API error',
+                status: response.status
+            })
+        }
 
         const data = await response.json()
 
-        currTrack = {
+        const base = {
             is_playing: data.is_playing,
-            name: data.item.name,
             timestamp: data.timestamp,
             progress_ms: data.progress_ms,
-            duration_ms: data.item.duration_ms,
-            type: data.currently_playing_type,
-            album: {
-                id: data.item.album.id,
-                uri: data.item.album.uri,
-                name: data.item.album.name,
-                release_date: data.item.album.release_date,
-                total_tracks: data.item.album.total_tracks,
-                images: data.item.album.images
-            }
+            currently_playing_type: data.currently_playing_type
         }
-        console.log(currTrack)
-        console.log(currTrack.album.images)
-        res.json(currTrack)
+
+        const snapshot = {
+            ...base,
+            item: data.item && data.currently_playing_type ==='track' ? {
+                id: data.item.id,
+                uri: data.item.uri,
+                name: data.item.name,
+                duration_ms: data.item.duration_ms,
+                artists: data.item.artists.map((artist) => ({
+                    id: artist.id,
+                    uri: artist.uri,
+                    name: artist.name
+                })),
+                album: {
+                    id: data.item.album.id,
+                    uri: data.item.album.uri,
+                    name: data.item.album.name,
+                    release_date: data.item.album.release_date,
+                    total_tracks: data.item.album.total_tracks,
+                    images: data.item.album.images
+                }  
+            } : null
+        }
+
+        res.json(snapshot)
     } catch (error) {
         console.error(`Error while getting current playback track: ${error}`)
         return res.status(500).json({ error: 'Failed to get playback track'})

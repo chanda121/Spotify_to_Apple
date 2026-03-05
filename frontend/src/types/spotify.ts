@@ -42,29 +42,12 @@ export interface SpotifyTrack {
     album: Album,
 }
 
-export interface WebPlaybackPlayer {
-    device_id: string
-}
-
-export interface WebPlaybackTrack {
-    id: string,
-    uri: string,
-    name: string,
-    album: {
-        uri: string,
-        name: string,
-        images: {
-            url: string
-        }[],
-        artists: {
-            uri: string,
-            name: string
-        }[]
-    },
-    artists: {
-        uri:string,
-        name: string,
-    }[]
+export interface PlaybackSnapshot {
+    is_playing: boolean,
+    timestamp: number,
+    progress_ms: number,
+    currently_playing_type: string,
+    track: SpotifyTrack
 }
 export interface WebPlaybackState {
     paused: boolean,

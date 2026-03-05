@@ -1,8 +1,44 @@
+import type { Request, Response } from 'express'
+
 const express = require('express')
 
 const { check_access_token } = require('../utils/utils')
 
 const router = express.Router()
+
+const fetchWithAuth = async <T>({req, res, url, onSuccess}:
+    {
+        req: Request
+        res: Response
+        url: string
+        onSuccess: (data: T | null) => void
+    }) => {
+        if (!await check_access_token(req)) {
+            return res.status(401).json({ ok: false })
+        }
+        const access_token = req.session.spotify_token.access_token
+        try {
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${access_token}` }
+            })
+            if (!response.ok) {
+                const text = await response.text().catch(() => '')
+                console.error('Spotify error: ', response.status, text)
+                return res.status(response.status).json({
+                    error: 'Spotify API error',
+                    status: response.status
+                })
+            }
+
+            const data = await response.json()
+            onSuccess(data)
+
+        } catch (error) {
+            console.error(`get email error: ${error}`)
+            return res.status(500).json({ error: 'Failed to get email'})
+        }
+    }
 
 router.get('/session', async (req, res) => {
     if (req.session.spotify_token && await check_access_token(req)) {
