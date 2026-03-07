@@ -3,7 +3,7 @@ export interface SpotifyItemsResponse<T> {
 }
 
 export interface SpotifyUser {
-    userId: string,
+    id: string,
     email?: string,
     display_name: string,
     images: Image[],
@@ -15,8 +15,32 @@ export interface SpotifyPlaylist {
     uri: string,
     name: string,
     ownerId: string,
+    ownerName: string,
     tracksHref: string
 }
+
+export interface SpotifyAPIPlaylist {
+    id: string,
+    uri: string,
+    href: string,
+    name: string,
+    description: string,
+    images: Image[],
+    owner: {
+        id: string,
+        uri: string,
+        external_urls: {
+            spotify: string
+        },
+        href: string,
+        display_name: string
+    }
+    items: {
+        href: string,
+        total: number
+    }
+}
+
 export interface Image {
     url: string,
     height: number,
@@ -29,7 +53,7 @@ export interface SpotifyAlbum {
     release_date: string, //parse to date
     total_tracks: number,
     images?: Image[],
-    artists?: Artist[]
+    artists?: SpotifyArtist[]
 }
 export interface SpotifyArtist {
     id: string,
@@ -42,8 +66,8 @@ export interface SpotifyTrack {
     uri: string,
     name: string,
     duration_ms: number,
-    artists: Artist[],
-    album: Album,
+    artists: SpotifyArtist[],
+    album: SpotifyAlbum,
 }
 
 export interface PlaybackSnapshot {

@@ -21,7 +21,7 @@ const redirect_auth_uri = process.env.SPOTIFY_REDIRECT_URI
     }
 */
 
-const base64URLEncode = (str) =>{
+const base64URLEncode = (str: string) =>{
     return str.toString('base64')
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
@@ -35,7 +35,7 @@ const generateCodeChallenge = (verifier) => {
   return base64URLEncode(hashed);
 }
 
-router.get('/', (req, res) => {
+router.get('/', (req: Request, res: Response) => {
     req.session.generatedState = generateRandomString(16)
     req.session.codeVerifier = generateRandomString(64)
     const codeChallenge = generateCodeChallenge(req.session.codeVerifier)
@@ -58,7 +58,7 @@ router.get('/', (req, res) => {
     res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`)
 })
 
-router.get('/callback', async (req, res) => {
+router.get('/callback', async (req: Request, res: Response)  => {
     const code = req.query.code || null
     const state = req.query.state || null
     const err = req.query.error || null
@@ -112,28 +112,28 @@ router.get('/callback', async (req, res) => {
     }
 })
 
-router.get('/refresh_token', async (req, res) => {
+router.get('/refresh_token', async (req: Request, res: Response) => {
     const success = await refresh_token(req)
 
     if (!success) {
         return res.status(401).json({ ok: false })
     }
-    res.redirect(process.env.FRONTEND_URL) //TODO: bring back to page refresh happened on
+    return res.redirect(process.env.FRONTEND_URL) //TODO: bring back to page refresh happened on
 })
 
-router.get('/token', async (req, res) => {
+router.get('/token', async (req: Request, res: Response) => {
     if (!await check_access_token(req)) {
         return res.status(401).json({ access_token: null, error: 'not_authenticated' })
     }
     
-    res.json({ access_token: req.session.spotify_token.access_token })
+    return res.json({ access_token: req.session.spotify_token.access_token })
 })
 
-router.get('/logout', (req, res) => {
+router.get('/logout', (req: Request, res: Response) => {
     delete req.session.spotify_token
     delete req.session.generatedState
     delete req.session.codeVerifier
-    res.redirect('http://127.0.0.1:5173/')
+    return res.rediÍrect('http://127.0.0.1:5173/')
 })
 
 module.exports = router

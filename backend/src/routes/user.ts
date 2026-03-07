@@ -1,5 +1,5 @@
 import type { Request, Response } from 'express'
-import type { SpotifyUser, SpotifyTrack, SpotifyArtist, SpotifyAlbum, SpotifyItemsResponse } from '../../../shared/src/types/spotify'
+import type { SpotifyUser, SpotifyTrack, SpotifyArtist, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '../../../shared/src/types/spotify'
 
 const express = require('express')
 
@@ -7,7 +7,7 @@ const { check_access_token } = require('../utils/utils')
 
 const router = express.Router()
 
-const fetchWithAuth = async <T>({req, res, url, onSuccess}:
+const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
     {
         req: Request
         res: Response
@@ -15,12 +15,15 @@ const fetchWithAuth = async <T>({req, res, url, onSuccess}:
         onSuccess: (data: T | null) => Response
     }): Promise<Response> => {
         if (!await check_access_token(req)) {
-            return res.status(401).json({ ok: false })
+            console.error(`401 error, unauthorized access`)
+            return res.status(401).json({ 
+                error: {
+                    message: 'Invalid or missing access token...'
+                }
+             })
         }
         const access_token = req.session?.spotify_token?.access_token
-        if (!access_token) {
-            return res.status(401).json({ ok: false })
-        }
+
         try {
             const response = await fetch(url, {
                 method: 'GET',
@@ -31,18 +34,23 @@ const fetchWithAuth = async <T>({req, res, url, onSuccess}:
             }
             if (!response.ok) {
                 const text = await response.text().catch(() => '')
-                console.error('Spotify error: ', response.status, text)
+                console.error('Spotify error:', response.status, text)
                 return res.status(response.status).json({
-                    error: 'Spotify API error',
-                    status: response.status
+                    error: {
+                        message: 'Spotify API error...'
+                    }
                 })
             }
 
             const data = await response.json() as T
             return onSuccess(data)
         } catch (error) {
-            console.error(error)
-            return res.status(500).json({ error: 'Internal Server Error'})
+            console.error('fetchWithAuth error:', error)
+            return res.status(500).json({ 
+                error: {
+                    message: 'Internal Server Error'
+                }
+            })
         }
     }
 
@@ -65,7 +73,7 @@ router.get('/user-info', async (req, res) => {
                 return res.status(204).send()
             } else {
                 const user: SpotifyUser = {
-                    userId: data.id,
+                    id: data.id,
                     email: data.email,
                     display_name: data.display_name,
                     images: data.images ?? [],
@@ -87,12 +95,15 @@ router.get('/top-tracks', async (req, res) => {
         req, res, 
         url: `https://api.spotify.com/v1/me/top/tracks?time_range=${time_range}&limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
+            if(!data) {
+                return res.status(204).send()
+            }
             const tracks = data.items.map((track: SpotifyTrack) => ({
                 id: track.id,
                 uri: track.uri,
                 name: track.name,
                 duration_ms: track.duration_ms,
-                artists: track.artists.map((artist: Artist) => ({
+                artists: track.artists.map((artist: SpotifyArtist) => ({
                     id: artist.id,
                     uri: artist.uri,
                     name: artist.name,
@@ -119,6 +130,9 @@ router.get('/top-artists', async (req, res) => {
         req, res,
         url: `https://api.spotify.com/v1/me/top/artists?time_range=${time_range}&limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
+            if(!data) {
+                return res.status(204).send()
+            }
             const artists = data.items.map((artist) => ({
                 id: artist.id,
                 uri: artist.uri,
@@ -135,16 +149,19 @@ router.get('/top-artists', async (req, res) => {
 
 })
 
-router.get('/:id/playlists', async (req, res) => {
+router.get('/:id/playlists', async (req: Request, res: Response) => {
     if (!await check_access_token(req)) {
-        return res.status(401).json({ ok: false })
+        return res.status(401).json({ 
+            error: {
+                message: 'Invalid or missing access token...'
+            }
+        })
     }
     const access_token = req.session.spotify_token.access_token
-    const userId = req.params.id
     const limit = Number(req.query.limit) || 50
     const offset = Number(req.query.offset) || 0
     try {
-        let response = await fetch(`https://api.spotify.com/v1/users/${userId}/playlists?limit=${limit}&offset=${offset}`, {
+        let response = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
             method: 'GET',
             headers: { 'Authorization': `Bearer ${access_token}` }
         })
@@ -160,18 +177,23 @@ router.get('/:id/playlists', async (req, res) => {
             jsonResponse = jsonResponse.concat(initData.items)
         }
 
-        jsonResponse = jsonResponse.map((playlist) => ({
+        jsonResponse = jsonResponse.map((playlist: SpotifyAPIPlaylist) => ({
                 id: playlist.id,
                 uri: playlist.uri,
                 name: playlist.name,
                 ownerId: playlist.owner.id,
-                tracksHref: playlist.tracks.href
+                ownerName: playlist.owner.display_name,
+                tracksHref: playlist.items.href
             }))
 
-        res.json(jsonResponse)
+        return res.json(jsonResponse)
     } catch (error) {
         console.error(`get query error (playlists): ${error}`)
-        return res.status(500).json({ error: 'Failed to get query'})
+        return res.status(500).json({ 
+            error: {
+                message: 'Failed to get query'
+            }
+        })
     }
 })
 
