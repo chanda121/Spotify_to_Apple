@@ -26,6 +26,13 @@ export function Backdrop() {
         return () => clearInterval(refresh)
     }, [fetchSnapshot])
 
+    useEffect(() => {
+        if (!is_playing) return
+
+        const updateProgress = setInterval(() => {
+            
+        })
+    })
 
     return (
         <div>
@@ -43,10 +50,10 @@ export function Backdrop() {
                     </div>
                     {/* Track info */}
                     <div className='grow flex flex-col'>
-                        <h2 className='font-bold leading-none'>
+                        <h2 className='leading-tight font-bold text-xl'>
                             {currTrackName}
                         </h2>
-                        <div className='opacity-90 italic'>
+                        <div className='leading-none opacity-90 italic mt-1'>
                             {currTrackArtists?.join(', ')}
                         </div> 
  
