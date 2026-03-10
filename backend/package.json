@@ -2,9 +2,9 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.ts",
   "scripts": {
-    "devstart": "nodemon ./src/index.js",
+    "dev": "tsx watch --env-file=.env ./src/index.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "danny chan",
@@ -18,6 +18,8 @@
   "devDependencies": {
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",
-    "nodemon": "^3.1.11"
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
   }
 }

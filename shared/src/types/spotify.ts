@@ -1,5 +1,6 @@
 export interface SpotifyItemsResponse<T> {
     items: T[]
+    next?: string
 }
 
 export interface SpotifyUser {
@@ -70,10 +71,31 @@ export interface SpotifyTrack {
     album: SpotifyAlbum,
 }
 
-export interface PlaybackSnapshot {
+
+export interface SpotifyPlaybackSnapshot {
     is_playing: boolean,
     timestamp: number,
     progress_ms: number,
     currently_playing_type: string,
     track: SpotifyTrack
+}
+
+export interface SpotifyAPIPlaybackSnapshot {
+    is_playing: boolean,
+    timestamp: number,
+    progress_ms: number,
+    currently_playing_type: string,
+    item: SpotifyTrack | null
+}
+export interface SpotifyToken {
+    access_token: string,
+    token_type: string,
+    expires_in: number,
+    refresh_token: string
+    scope?: string,
+}
+
+export interface SpotifyTokenError {
+  error: string
+  error_description?: string
 }

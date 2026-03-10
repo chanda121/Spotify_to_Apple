@@ -113,9 +113,6 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     },
 
     fetchPlaylists: async () => {
-        const userId = get().user?.userId
-        if (!userId) throw new Error('User not loaded')
-
         const limit = 10
         const offset = 0
         await runAsyncAction({
@@ -123,7 +120,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             loadingKey: 'isLoadingPlaylists',
             errorKey: 'playlistsError',
             onSuccess: (data: Playlist[]) => {set({ playlists: data })},
-            asyncFn: () => fetchWithAuth<Playlist[]>(`/api/user/${userId}/playlists?limit=${limit}&offset=${offset}`)
+            asyncFn: () => fetchWithAuth<Playlist[]>(`/api/user/playlists?limit=${limit}&offset=${offset}`)
         })
     },
     

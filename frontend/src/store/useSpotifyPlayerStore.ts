@@ -16,7 +16,7 @@ interface SpotifyPlayerAction {
     fetchSnapshot: () => Promise<void>
 }
 
-export const useSpotifyPlayerStore = create<SpotifyPlayerState & SpotifyPlayerAction>((set, get) => ({
+export const useSpotifyPlayerStore = create<SpotifyPlayerState & SpotifyPlayerAction>((set) => ({
     snapshot: null,
     local_progress_ms: 0,
     

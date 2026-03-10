@@ -1,19 +1,22 @@
-require('dotenv').config({ path: './.env' });
+import express from 'express'
+import session from 'express-session'
+import createError, { HttpError } from 'http-errors'
 
-const express = require('express')
-const session = require('express-session')
-const createError = require('http-errors')
+import userRouter from './routes/user.js'
+import authRouter from './routes/auth.js'
+import spotifyPlayerRouter from './routes/spotifyPlayer.js'
 
-const userRouter = require('./routes/user')
-const authRouter = require('./routes/auth')
-const spotifyPlayerRouter = require('./routes/spotifyPlayer')
+import type { Response, Request, NextFunction } from 'express'
 
 const app = express()
 
 const port = process.env.PORT || 3000
 
+const sessionSecret = process.env.SESSION_SECRET
+if(!sessionSecret) throw new Error('SESSION_SECRET env var is not set')
+
 app.use(session({
-    secret: process.env.SESSION_SECRET,
+    secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
     cookie: { secure: false }
@@ -23,16 +26,16 @@ app.use('/api/user', userRouter)
 app.use('/api/auth', authRouter)
 app.use('/api/spotify-player', spotifyPlayerRouter)
 
-app.get('/', (req, res) => {
+app.get('/', (req: Request, res: Response) => {
     res.send('Hello World')
 })
 
-app.use((req, res, next) => {
+app.use((req: Request, res: Response, next: NextFunction) => {
     console.log(`404 for ${req.originalUrl}`)
     next(createError(404))
 })
 //error handler
-app.use((err, req, res, next) => {
+app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
     console.error(err)
     res.status(err.status || 500);
     res.json(err.status==404 ? { error: { message: 'Not Found' } } : { error: { message: 'Internal Server Error' } })

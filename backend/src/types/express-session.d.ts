@@ -7,6 +7,8 @@ declare module 'express-session' {
         refresh_token: string,
         expires_in: number, //seconds
         expires_datetime: number //seconds
-    };
+    }
+    generatedState?: string
+    codeVerifier?: string
   }
 }

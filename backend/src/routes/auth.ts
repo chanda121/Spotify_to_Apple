@@ -1,7 +1,10 @@
-const express = require('express')
-const crypto = require('crypto')
+import express from 'express'
+import type { Request, Response } from 'express'
+import crypto from 'crypto'
+import { SpotifyToken, SpotifyTokenError } from '@shared/types/spotify.js'
+import { refresh_token, check_access_token } from '../utils/utils.js'
 
-const { refresh_token, check_access_token } = require('../utils/utils')
+
 
 const router = express.Router()
 
@@ -21,16 +24,16 @@ const redirect_auth_uri = process.env.SPOTIFY_REDIRECT_URI
     }
 */
 
-const base64URLEncode = (str: string) =>{
+const base64URLEncode = (str: Buffer): string => {
     return str.toString('base64')
         .replace(/\+/g, '-')
         .replace(/\//g, '_')
         .replace(/=/g, '');
 }
-const generateRandomString = (length) => {
+const generateRandomString = (length: number): string => {
     return base64URLEncode(crypto.randomBytes(length)).slice(0, length)
 }
-const generateCodeChallenge = (verifier) => {
+const generateCodeChallenge = (verifier: string): string => {
   const hashed = crypto.createHash('sha256').update(verifier).digest()
   return base64URLEncode(hashed);
 }
@@ -40,28 +43,26 @@ router.get('/', (req: Request, res: Response) => {
     req.session.codeVerifier = generateRandomString(64)
     const codeChallenge = generateCodeChallenge(req.session.codeVerifier)
 
-    const scope = `user-read-private user-read-email user-read-playback-state user-modify-playback-state 
-                 user-read-currently-playing user-library-read
-                 streaming user-top-read user-read-playback-position 
-                 playlist-read-private playlist-read-collaborative`
+    const scope = `user-read-private user-read-email user-read-currently-playing user-library-read user-top-read
+                 playlist-read-private playlist-read-collaborative playlist-modify-private`
 
     const params = new URLSearchParams({
-        client_id: client_id,
+        client_id: client_id ?? '',
         response_type: 'code',
-        redirect_uri: redirect_auth_uri,
+        redirect_uri: redirect_auth_uri ?? '',
         state: req.session.generatedState,
         scope: scope,
         code_challenge_method: 'S256',
         code_challenge: codeChallenge
     })
 
-    res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`)
+    return res.redirect(`https://accounts.spotify.com/authorize?${params.toString()}`)
 })
 
 router.get('/callback', async (req: Request, res: Response)  => {
-    const code = req.query.code || null
-    const state = req.query.state || null
-    const err = req.query.error || null
+    const code = (req.query.code as string) || ''
+    const state = (req.query.state as string) || null
+    const err = (req.query.error as string) || null
 
     if (state === null || state !== req.session.generatedState) {
         const errorParams = new URLSearchParams({ error: 'state_mismatch' })
@@ -82,15 +83,20 @@ router.get('/callback', async (req: Request, res: Response)  => {
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
                 code: code,
-                redirect_uri: redirect_auth_uri,
-                client_id: client_id,
-                code_verifier: req.session.codeVerifier
+                redirect_uri: redirect_auth_uri ?? '',
+                client_id: client_id ?? '',
+                code_verifier: req.session.codeVerifier ?? ''
             })
         })
 
-        const data = await tokenResponse.json()
+        if (!tokenResponse.ok) {
+            const errorParams = new URLSearchParams({ error: 'token_fetch_failed' })
+            return res.redirect(`/?${errorParams.toString()}`)
+        }
 
-        if (data.error) {
+        const data = await tokenResponse.json() as SpotifyToken | SpotifyTokenError
+
+        if ('error' in data) {
             const errorParams = new URLSearchParams({ error: data.error })
             return res.redirect(`/?${errorParams.toString()}`)
         }
@@ -99,16 +105,16 @@ router.get('/callback', async (req: Request, res: Response)  => {
             access_token: data.access_token,
             refresh_token: data.refresh_token,
             expires_in: data.expires_in,
-            expires_datetime: Date.now()+data.expires_in*1000
+            expires_datetime: Date.now() + data.expires_in * 1000
         }
 
         delete req.session.generatedState
         delete req.session.codeVerifier
 
-        res.redirect('http://127.0.0.1:5173/')
+        return res.redirect(process.env.FRONTEND_URL ?? 'http://127.0.0.1:5173/')
     } catch (error) {
         console.error('Token exchange error:', error)
-        res.status(500).json({ error: 'Failed to exchange token' })
+        return res.status(500).json({ error: 'Failed to exchange token' })
     }
 })
 
@@ -118,7 +124,7 @@ router.get('/refresh_token', async (req: Request, res: Response) => {
     if (!success) {
         return res.status(401).json({ ok: false })
     }
-    return res.redirect(process.env.FRONTEND_URL) //TODO: bring back to page refresh happened on
+    return res.redirect(process.env.FRONTEND_URL ?? 'http://127.0.0.1:5173/')
 })
 
 router.get('/token', async (req: Request, res: Response) => {
@@ -126,14 +132,15 @@ router.get('/token', async (req: Request, res: Response) => {
         return res.status(401).json({ access_token: null, error: 'not_authenticated' })
     }
     
-    return res.json({ access_token: req.session.spotify_token.access_token })
+    return res.json({ access_token: req.session.spotify_token?.access_token })
 })
 
 router.get('/logout', (req: Request, res: Response) => {
     delete req.session.spotify_token
     delete req.session.generatedState
     delete req.session.codeVerifier
-    return res.rediÍrect('http://127.0.0.1:5173/')
+
+    return res.redirect('http://127.0.0.1:5173/')
 })
 
-module.exports = router
+export default router

@@ -1,10 +1,11 @@
-const express = require('express')
-
-const { check_access_token } = require('../utils/utils')
+import express from 'express'
+import type { Request, Response } from 'express'
+import { check_access_token }  from '../utils/utils.js'
+import { SpotifyAPIPlaybackSnapshot } from '@shared/types/spotify.js'
 
 const router = express.Router()
 
-router.get('/get_current_track', async (req, res) => {
+router.get('/get_current_track', async (req: Request, res: Response) => {
     if (!await check_access_token(req)) {
         return res.status(401).json({ 
             error: {
@@ -12,7 +13,7 @@ router.get('/get_current_track', async (req, res) => {
             }
         })
     }
-    const access_token = req.session.spotify_token.access_token
+    const access_token = req.session.spotify_token?.access_token
 
     try {
         const response = await fetch('https://api.spotify.com/v1/me/player/currently-playing', {
@@ -38,7 +39,7 @@ router.get('/get_current_track', async (req, res) => {
             })
         }
 
-        const data = await response.json()
+        const data = await response.json() as SpotifyAPIPlaybackSnapshot
 
         const base = {
             is_playing: data.is_playing,
@@ -49,7 +50,7 @@ router.get('/get_current_track', async (req, res) => {
 
         const snapshot = {
             ...base,
-            item: data.item && data.currently_playing_type ==='track' ? {
+            item: data.item && data.currently_playing_type === 'track' ? {
                 id: data.item.id,
                 uri: data.item.uri,
                 name: data.item.name,
@@ -81,4 +82,4 @@ router.get('/get_current_track', async (req, res) => {
     }
 })
 
-module.exports = router
+export default router
