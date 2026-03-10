@@ -41,34 +41,15 @@ router.get('/get_current_track', async (req: Request, res: Response) => {
 
         const data = await response.json() as SpotifyAPIPlaybackSnapshot
 
-        const base = {
+        let snapshot = {
             is_playing: data.is_playing,
             timestamp: data.timestamp,
             progress_ms: data.progress_ms,
-            currently_playing_type: data.currently_playing_type
-        }
-
-        const snapshot = {
-            ...base,
-            item: data.item && data.currently_playing_type === 'track' ? {
-                id: data.item.id,
-                uri: data.item.uri,
-                name: data.item.name,
-                duration_ms: data.item.duration_ms,
-                artists: data.item.artists.map((artist) => ({
-                    id: artist.id,
-                    uri: artist.uri,
-                    name: artist.name
-                })),
-                album: {
-                    id: data.item.album.id,
-                    uri: data.item.album.uri,
-                    name: data.item.album.name,
-                    release_date: data.item.album.release_date,
-                    total_tracks: data.item.album.total_tracks,
-                    images: data.item.album.images
-                }  
-            } : null
+            currently_playing_type: data.currently_playing_type,
+            trackName: data.item && data.currently_playing_type === 'track' ? data.item.name : null,
+            trackDuration: data.item && data.currently_playing_type === 'track' ? data.item.duration_ms : 0,
+            artistNames: data.item && data.currently_playing_type === 'track' ? data.item.artists.map(artist => artist.name) : [],
+            albumImgs: data.item && data.currently_playing_type === 'track' ? data.item.album.images : []
         }
 
         return res.json(snapshot)

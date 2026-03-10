@@ -16,10 +16,12 @@ export function Stats() {
     const topArtistsError = useSpotifyUserStore((state) => state.topArtistsError)
     const topArtistsLoading = useSpotifyUserStore((state) => state.isLoadingTopArtists)
 
+    const ARTIST_IMG_SIZE = 160
+
 return(
     <div className='max-w-4xl mx-auto flex content-center flex-col space-y-5'>
         <div key='user-stats'>
-            <h1 className="text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20">Stats here</h1>
+            <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20'>Stats here</h1>
             {!userLoading &&
                 <div>
                     {user && 
@@ -38,19 +40,19 @@ return(
                 </div>
             }
             {userError &&
-                <div className="bg-red-500/10 text-red-400 px-4 py-3 rounded-lg">
+                <div className='bg-red-500/10 text-red-400 px-4 py-3 rounded-lg'>
                 Error: {userError}
                 </div>
             }            
         </div>
         <div key='Top-Tracks'>
-            <h1 className="text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20">Top Tracks</h1>
+            <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20'>Top Tracks</h1>
             {!topTracksLoading &&
                 <div className='space-y-1'>
                     {
                         topTracks.map((track, index) => (
                             <div key={track.id} className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-900/10 dark:hover:bg-white/10 transition-colors'>
-                                <span className="w-8 text-2xl font-bold text-black/30 dark:text-white/30">{index + 1}</span>
+                                <span className='w-8 text-2xl font-bold text-black/30 dark:text-white/30'>{index + 1}</span>
                                 <div>
                                     <div className='font-semibold it'>{track.name}</div>
                                     <div className='italic'>{track.artists.map(a => a.name).join(', ')}</div>
@@ -65,31 +67,35 @@ return(
                     <BlinkBlur size='small'/>
                 </div>            }
             {topTracksError &&
-                <div className="bg-red-500/10 text-red-400 px-4 py-3 rounded-lg">
+                <div className='bg-red-500/10 text-red-400 px-4 py-3 rounded-lg'>
                 Error: {topTracksError}
                 </div>
             }
         </div>
         <div key='Top-Artists'>
-            <h1 className="text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20">Top Artists</h1>
+            <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20'>Top Artists</h1>
             {!topArtistsLoading &&
                 <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                     {
                         topArtists.map((artist, index) => (
                             <div key={artist.id} className='flex items-center gap-4 rounded-xl p-4 hover:bg-gray-900/10 dark:hover:bg-white/10 transition-colors'>
+
                                 {
                                     artist.images?.length && artist.images[2] &&
                                     <img src={artist.images[2]?.url}
-                                        width={artist.images[2]?.width} 
-                                        height={artist.images[2]?.height}
+                                        // width={artist.images[2]?.width} 
+                                        // height={artist.images[2]?.height}
+                                        width={ARTIST_IMG_SIZE}
+                                        height={ARTIST_IMG_SIZE}
                                         alt={artist.name}
                                         className='rounded-full object-cover'
                                     />
+                                    
                                 
                                 }
                                 <div className='content-center font-bold text-2xl'>
-                                    <span className="text-black/40 dark:text-white/40 text-sm">#{index + 1}</span>
-                                    <div className="font-bold text-lg">{artist.name}</div>
+                                    <span className='text-black/40 dark:text-white/40 text-sm'>#{index + 1}</span>
+                                    <div className='font-bold text-lg'>{artist.name}</div>
                                 </div>
                                 
 
@@ -104,7 +110,7 @@ return(
                 </div>
             }
             {topArtistsError &&
-                <div className="bg-red-500/10 text-red-400 px-4 py-3 rounded-lg">
+                <div className='bg-red-500/10 text-red-400 px-4 py-3 rounded-lg'>
                 Error: {topArtistsError}
                 </div>
             }

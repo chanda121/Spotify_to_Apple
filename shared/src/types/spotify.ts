@@ -77,7 +77,10 @@ export interface SpotifyPlaybackSnapshot {
     timestamp: number,
     progress_ms: number,
     currently_playing_type: string,
-    track: SpotifyTrack
+    trackName: string,
+    trackDuration: number,
+    artistNames: string[],
+    albumImgs: Image[]
 }
 
 export interface SpotifyAPIPlaybackSnapshot {

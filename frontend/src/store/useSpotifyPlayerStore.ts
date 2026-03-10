@@ -2,11 +2,11 @@ import { create } from 'zustand'
 import { fetchWithAuth } from '../utils/api'
 
 import type {
-    PlaybackSnapshot, 
-} from '../types/spotify'
+    SpotifyPlaybackSnapshot, 
+} from '@shared/types/spotify'
 
 interface SpotifyPlayerState {
-    snapshot: PlaybackSnapshot | null,
+    snapshot: SpotifyPlaybackSnapshot | null,
     local_progress_ms: number
 
     isLoadingSnapshot: boolean,
@@ -26,7 +26,7 @@ export const useSpotifyPlayerStore = create<SpotifyPlayerState & SpotifyPlayerAc
     fetchSnapshot: async () => {
         set({ isLoadingSnapshot: true, snapshotError: null })
         try {
-            const data = await fetchWithAuth<PlaybackSnapshot>('/api/spotify-player/get_current_track')
+            const data = await fetchWithAuth<SpotifyPlaybackSnapshot>('/api/spotify-player/get_current_track')
             set({ snapshot: data, local_progress_ms: data.progress_ms })
         } catch (error) {
             console.error(error)

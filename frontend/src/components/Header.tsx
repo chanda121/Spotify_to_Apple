@@ -1,7 +1,7 @@
-import { useState } from "react"
-import { ThemeToggle } from "./ThemeToggle"
-import { headerNavItems } from "../data/header-nav-links"
-import { Link } from "react-router-dom"
+import { useState } from 'react'
+import { ThemeToggle } from './ThemeToggle'
+import { headerNavItems } from '../data/header-nav-links'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../auth/authContext'
 
 export function Header() {

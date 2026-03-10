@@ -8,15 +8,22 @@ export const refresh_token = async (req: Request): Promise<boolean> => {
     const refreshTokenVal = req.session.spotify_token ? req.session.spotify_token.refresh_token : null
 
     try {
+        if (!refreshTokenVal) {
+            throw new Error("No refresh token found in session...")
+        }
+        if (!process.env.SPOTIFY_CLIENT_ID) {
+            throw new Error('Missing SPOTIFY_CLIENT_ID')
+        }
+
         const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
                 'content-type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams({
-                client_id: process.env.SPOTIFY_CLIENT_ID ?? '',
+                client_id: process.env.SPOTIFY_CLIENT_ID,
                 grant_type: 'refresh_token',
-                refresh_token: refreshTokenVal ?? ''
+                refresh_token: refreshTokenVal
             })
         })
         
