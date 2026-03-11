@@ -33,6 +33,6 @@ export const useSpotifyPlayerStore = create<SpotifyPlayerState & SpotifyPlayerAc
         } finally {
             set({ isLoadingSnapshot: false })
         }
-    }
+    },
 }))
 

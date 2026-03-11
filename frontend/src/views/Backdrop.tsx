@@ -1,14 +1,14 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSpotifyPlayerStore } from '../store/useSpotifyPlayerStore'
 import { DigitalClock, ProgressBar } from '../components'
 
 
 export function Backdrop() {
     const fetchSnapshot = useSpotifyPlayerStore((state) => state.fetchSnapshot)
+    const incrementProgress = useSpotifyPlayerStore((state) => state.incrementProgress)
 
-    const is_playing = useSpotifyPlayerStore((state) => state.snapshot?.is_playing)
-    const local_progress_ms = useSpotifyPlayerStore((state) => state.local_progress_ms)
-    const currently_playing_type = useSpotifyPlayerStore((state) => state.snapshot?.currently_playing_type)//track, episode, or unknown
+    const isPlaying = useSpotifyPlayerStore((state) => state.snapshot?.is_playing)
+    const apiProgress = useSpotifyPlayerStore((state) => state.local_progress_ms)
     
     const currTrackName = useSpotifyPlayerStore((state) => state.snapshot?.trackName) //current track name
     const currTrackDur_ms = useSpotifyPlayerStore((state) => state.snapshot?.trackDuration) //duration in ms
@@ -17,6 +17,8 @@ export function Backdrop() {
 
 
     const snapshotError = useSpotifyPlayerStore((state) => state.snapshotError)
+
+    const [localProgressMs, setLocalProgressMs ] = useState(apiProgress)
 
     useEffect(() => {
         const refresh = setInterval(() => {
@@ -27,12 +29,14 @@ export function Backdrop() {
     }, [fetchSnapshot])
 
     useEffect(() => {
-        if (!is_playing) return
+        if (!isPlaying) return
 
         const updateProgress = setInterval(() => {
-            
-        })
-    })
+            setLocalProgressMs(prev => prev + 100)
+        }, 100)
+
+        return () => clearInterval(updateProgress)
+    }, [isPlaying])
 
     return (
         <div>
@@ -51,17 +55,19 @@ export function Backdrop() {
                     {/* Track info */}
                     <div className='grow flex flex-col'>
                         <h2 className='leading-tight font-bold text-xl'>
-                            {currTrackName}
+                            {currTrackName ?? `Nothing right now`}
                         </h2>
                         <div className='leading-none opacity-90 italic mt-1'>
-                            {currTrackArtists?.join(', ')}
+                            {currTrackArtists?.join(', ') ?? `Nothing at all`}
                         </div> 
  
                     </div>
 
                 </div>
                 <div>
-                    <ProgressBar duration_ms={currTrackDur_ms ?? 0} progress_ms={local_progress_ms}></ProgressBar>
+                    <ProgressBar 
+                        duration_ms={currTrackDur_ms ?? 0} 
+                        progress_ms={localProgressMs}/>
                 </div>
             </div>                
 
