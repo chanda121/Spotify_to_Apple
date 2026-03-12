@@ -3,7 +3,7 @@ export interface SpotifyItemsResponse<T> {
     next?: string
 }
 
-export interface SpotifyUser {
+export interface SpotifyApiUser {
     id: string,
     email?: string,
     display_name: string,
@@ -11,6 +11,16 @@ export interface SpotifyUser {
     country?: string,
     product?: string,
 }
+
+export interface SpotifyUser {
+    id: string,
+    email?: string,
+    displayName: string,
+    images: Image[],
+    country?: string,
+    product?: string,
+}
+
 export interface SpotifyPlaylist {
     id: string,
     uri: string,
@@ -47,7 +57,7 @@ export interface Image {
     height: number,
     width: number
 }
-export interface SpotifyAlbum {
+export interface SpotifyAPIAlbum {
     id: string,
     uri: string,
     name: string,
@@ -62,21 +72,30 @@ export interface SpotifyArtist {
     name: string,
     images?: Image[]
 }
+
 export interface SpotifyTrack {
+    id: string,
+    uri: string,
+    name: string,
+    durationMs: number,
+    artists: SpotifyArtist[],
+    album: SpotifyAPIAlbum,
+}
+export interface SpotifyAPITrack {
     id: string,
     uri: string,
     name: string,
     duration_ms: number,
     artists: SpotifyArtist[],
-    album: SpotifyAlbum,
+    album: SpotifyAPIAlbum,
 }
 
 
 export interface SpotifyPlaybackSnapshot {
-    is_playing: boolean,
+    isPlaying: boolean,
     timestamp: number,
-    progress_ms: number,
-    currently_playing_type: string,
+    progressMs: number,
+    currentlyPlayingType: string,
     trackName: string,
     trackDuration: number,
     artistNames: string[],
@@ -88,9 +107,9 @@ export interface SpotifyAPIPlaybackSnapshot {
     timestamp: number,
     progress_ms: number,
     currently_playing_type: string,
-    item: SpotifyTrack | null
+    item: SpotifyAPITrack | null
 }
-export interface SpotifyToken {
+export interface SpotifyAPIToken {
     access_token: string,
     token_type: string,
     expires_in: number,

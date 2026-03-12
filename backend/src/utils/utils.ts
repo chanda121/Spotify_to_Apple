@@ -1,11 +1,11 @@
 import type { Request } from "express"
-import type { SpotifyToken, SpotifyTokenError } from "../../../shared/src/types/spotify.js"
+import type { SpotifyAPIToken, SpotifyTokenError } from "@shared/types/spotify.js"
 
 const BUFFER = 60000 //60 second buffer
 
 
-export const refresh_token = async (req: Request): Promise<boolean> => {
-    const refreshTokenVal = req.session.spotify_token ? req.session.spotify_token.refresh_token : null
+export const refreshToken = async (req: Request): Promise<boolean> => {
+    const refreshTokenVal = req.session.spotify_token ? req.session.spotify_token.refreshToken : null
 
     try {
         if (!refreshTokenVal) {
@@ -33,15 +33,15 @@ export const refresh_token = async (req: Request): Promise<boolean> => {
             return false
         }
 
-        const data = await tokenResponse.json() as SpotifyToken | SpotifyTokenError
+        const data = await tokenResponse.json() as SpotifyAPIToken | SpotifyTokenError
 
         if ('error' in data) return false
         
         req.session.spotify_token = {
-            access_token: data.access_token,
-            refresh_token: data.refresh_token ?? refreshTokenVal ?? '',
-            expires_in: data.expires_in,
-            expires_datetime: Date.now() + data.expires_in * 1000
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token ?? refreshTokenVal ?? '',
+            expiresIn: data.expires_in,
+            expiresDatetime: Date.now() + data.expires_in * 1000
         }
         
         return true
@@ -57,11 +57,11 @@ export const refresh_token = async (req: Request): Promise<boolean> => {
  * Refreshes the token if expired.
  * Returns false if no token exists or refresh fails.
  */
-export const check_access_token = async (req: Request): Promise<boolean> => {
+export const checkAccessToken = async (req: Request): Promise<boolean> => {
     if (!req.session.spotify_token) return false
 
-    if (Date.now() > req.session.spotify_token.expires_datetime - BUFFER) {
-        const success = await refresh_token(req)
+    if (Date.now() > req.session.spotify_token.expiresDatetime - BUFFER) {
+        const success = await refreshToken(req)
 
         return success
     }

@@ -3,14 +3,14 @@ import { AuthContext } from './authContext'
 import { useSpotifyUserStore } from '../store/useSpotifyUserStore'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-    const [status, setStatus] = useState<'logged_in' | 'logged_out' | 'loading'>('loading')
+    const [status, setStatus] = useState<'loggedIn' | 'loggedOut' | 'loading'>('loading')
 
     const resetStore = useSpotifyUserStore((state) => state.reset)
 
     const logout = async (): Promise<void> => {
         await fetch('/api/auth/logout')
         resetStore() // Clear all cached data
-        setStatus('logged_out')
+        setStatus('loggedOut')
         window.location.href = 'http://127.0.0.1:5173/'
     }
 
@@ -23,27 +23,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     //set status here
     useEffect( () => {
-        const check_session = async () => {
+        const checkSession = async () => {
             const response = await fetch('/api/user/session')
             const data = await response.json()
-            if (data.logged_in) {
-                setStatus('logged_in')
+            if (data.loggedIn) {
+                setStatus('loggedIn')
             } else {
                 resetStore() // Clear stale data when session expires
-                setStatus('logged_out')
+                setStatus('loggedOut')
             }
         }
-        check_session()
+        checkSession()
 
-        window.addEventListener('focus', check_session)
+        window.addEventListener('focus', checkSession)
         return () => {
-            window.removeEventListener('focus', check_session)
+            window.removeEventListener('focus', checkSession)
         }
     }, [resetStore])
 
     // Fetch user data once when logged in
     useEffect(() => {
-        if (status === 'logged_in') {
+        if (status === 'loggedIn') {
             void fetchUser()
             void fetchTopTracks()
             void fetchTopArtists()

@@ -1,7 +1,7 @@
 import express from 'express'
 import type { Request, Response as ExpressResponse } from 'express'
-import type { SpotifyUser, SpotifyTrack, SpotifyArtist, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '@shared/types/spotify.js'
-import { check_access_token } from '../utils/utils.js'
+import type { SpotifyApiUser, SpotifyUser, SpotifyAPITrack, SpotifyTrack, SpotifyArtist, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '@shared/types/spotify.js'
+import { checkAccessToken } from '../utils/utils.js'
 
 const router = express.Router()
 
@@ -32,7 +32,7 @@ const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
         url: string
         onSuccess: (data: T | null) => ExpressResponse
     }): Promise<ExpressResponse | void> => {
-        if (!await check_access_token(req)) {
+        if (!await checkAccessToken(req)) {
             console.error(`401 error, unauthorized access`)
             return res.status(401).json({ 
                 error: {
@@ -40,12 +40,12 @@ const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
                 }
              })
         }
-        const access_token = req.session.spotify_token?.access_token
+        const accessToken = req.session.spotify_token?.accessToken
 
         try {
             const response = await fetch(url, {
                 method: 'GET',
-                headers: { 'Authorization': `Bearer ${access_token}` }
+                headers: { 'Authorization': `Bearer ${accessToken}` }
             })
             if (response.status === 204) {
                 return onSuccess(null)
@@ -66,16 +66,16 @@ const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
     }
 
 router.get('/session', async (req: Request, res: ExpressResponse) => {
-    if (req.session.spotify_token && await check_access_token(req)) {
-        return res.json({logged_in: true})
+    if (req.session.spotify_token && await checkAccessToken(req)) {
+        return res.json({loggedIn: true})
 
     } else {
-        return res.json({logged_in: false})
+        return res.json({loggedIn: false})
     }
 })
 
 router.get('/user-info', async (req: Request, res: ExpressResponse) => {
-    await fetchWithAuth<SpotifyUser>({
+    await fetchWithAuth<SpotifyApiUser>({
         req,
         res,
         url: 'https://api.spotify.com/v1/me',
@@ -86,7 +86,7 @@ router.get('/user-info', async (req: Request, res: ExpressResponse) => {
                 const user: SpotifyUser = {
                     id: data.id,
                     email: data.email,
-                    display_name: data.display_name,
+                    displayName: data.display_name,
                     images: data.images ?? [],
                     country: data.country,
                     product: data.product,
@@ -98,22 +98,22 @@ router.get('/user-info', async (req: Request, res: ExpressResponse) => {
 })
 
 router.get('/top-tracks', async (req: Request, res: ExpressResponse) => {
-    const time_range = req.query.time_range || 'short_term'
+    const timeRange = req.query.time_range || 'short_term'
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
 
-    await fetchWithAuth<SpotifyItemsResponse<SpotifyTrack>>({
+    await fetchWithAuth<SpotifyItemsResponse<SpotifyAPITrack>>({
         req, res, 
-        url: `https://api.spotify.com/v1/me/top/tracks?time_range=${time_range}&limit=${limit}&offset=${offset}`,
+        url: `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
             if(!data) {
                 return res.status(204).send()
             }
-            const tracks = data.items.map((track: SpotifyTrack) => ({
+            const tracks = data.items.map((track: SpotifyAPITrack) => ({
                 id: track.id,
                 uri: track.uri,
                 name: track.name,
-                duration_ms: track.duration_ms,
+                durationMs: track.duration_ms,
                 artists: track.artists.map((artist: SpotifyArtist) => ({
                     id: artist.id,
                     uri: artist.uri,
@@ -134,12 +134,12 @@ router.get('/top-tracks', async (req: Request, res: ExpressResponse) => {
 })
 
 router.get('/top-artists', async (req: Request, res: ExpressResponse) => {
-    const time_range = req.query.time_range || 'short_term'
+    const timeRange = req.query.time_range || 'short_term'
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
     await fetchWithAuth<SpotifyItemsResponse<SpotifyArtist>>({
         req, res,
-        url: `https://api.spotify.com/v1/me/top/artists?time_range=${time_range}&limit=${limit}&offset=${offset}`,
+        url: `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
             if(!data) {
                 return res.status(204).send()
@@ -161,20 +161,20 @@ router.get('/top-artists', async (req: Request, res: ExpressResponse) => {
 })
 
 router.get('/playlists', async (req: Request, res: ExpressResponse) => {
-    if (!await check_access_token(req)) {
+    if (!await checkAccessToken(req)) {
         return res.status(401).json({ 
             error: {
                 message: 'Invalid or missing access token...'
             }
         })
     }
-    const access_token = req.session.spotify_token?.access_token
+    const accessToken = req.session.spotify_token?.accessToken
     const limit = Number(req.query.limit) || 50
     const offset = Number(req.query.offset) || 0
     try {
         let response = await fetch(`https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`, {
             method: 'GET',
-            headers: { 'Authorization': `Bearer ${access_token}` }
+            headers: { 'Authorization': `Bearer ${accessToken}` }
         })
 
         if (!await checkAPIResponse(response, res)) return
@@ -185,7 +185,7 @@ router.get('/playlists', async (req: Request, res: ExpressResponse) => {
 
         while (initData.next) {
             response = await fetch(initData.next, {
-                method: 'GET', headers: { 'Authorization': `Bearer ${access_token}` }
+                method: 'GET', headers: { 'Authorization': `Bearer ${accessToken}` }
             })
             if (!await checkAPIResponse(response, res)) return
 
@@ -219,7 +219,7 @@ router.get('/saved-songs', async (req: Request, res: ExpressResponse) => {
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
 
-    await fetchWithAuth<SpotifyTrack[]>({
+    await fetchWithAuth<SpotifyAPITrack[]>({
         req, res,
         url: `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {

@@ -1,27 +1,21 @@
 import express from 'express'
 import type { Request, Response } from 'express'
 import crypto from 'crypto'
-import { SpotifyToken, SpotifyTokenError } from '@shared/types/spotify.js'
-import { refresh_token, check_access_token } from '../utils/utils.js'
+import { SpotifyAPIToken, SpotifyTokenError } from '@shared/types/spotify.js'
+import { refreshToken, checkAccessToken } from '../utils/utils.js'
 
 
 
 const router = express.Router()
 
-const client_id = process.env.SPOTIFY_CLIENT_ID
+const clientId = process.env.SPOTIFY_CLIENT_ID
 
-const redirect_auth_uri = process.env.SPOTIFY_REDIRECT_URI
+const redirectAuthUri = process.env.SPOTIFY_REDIRECT_URI
 /*
     req.session.<x>
     x = generatedState: state for authorization check
     x = codeVerifier: PKCE authorization workflow
-    
-    req.session.spotify_token = {
-        access_token: data.access_token,
-        refresh_token: data.refresh_token,
-        expires_in: data.expires_in,
-        expires_datetime: (Date.now()+data.expires_in*1000
-    }
+
 */
 
 const base64URLEncode = (str: Buffer): string => {
@@ -47,9 +41,9 @@ router.get('/', (req: Request, res: Response) => {
                  playlist-read-private playlist-read-collaborative playlist-modify-private`
 
     const params = new URLSearchParams({
-        client_id: client_id ?? '',
+        client_id: clientId ?? '',
         response_type: 'code',
-        redirect_uri: redirect_auth_uri ?? '',
+        redirect_uri: redirectAuthUri ?? '',
         state: req.session.generatedState,
         scope: scope,
         code_challenge_method: 'S256',
@@ -83,8 +77,8 @@ router.get('/callback', async (req: Request, res: Response)  => {
             body: new URLSearchParams({
                 grant_type: 'authorization_code',
                 code: code,
-                redirect_uri: redirect_auth_uri ?? '',
-                client_id: client_id ?? '',
+                redirect_uri: redirectAuthUri ?? '',
+                client_id: clientId ?? '',
                 code_verifier: req.session.codeVerifier ?? ''
             })
         })
@@ -94,7 +88,7 @@ router.get('/callback', async (req: Request, res: Response)  => {
             return res.redirect(`/?${errorParams.toString()}`)
         }
 
-        const data = await tokenResponse.json() as SpotifyToken | SpotifyTokenError
+        const data = await tokenResponse.json() as SpotifyAPIToken | SpotifyTokenError
 
         if ('error' in data) {
             const errorParams = new URLSearchParams({ error: data.error })
@@ -102,10 +96,10 @@ router.get('/callback', async (req: Request, res: Response)  => {
         }
         
         req.session.spotify_token = {
-            access_token: data.access_token,
-            refresh_token: data.refresh_token,
-            expires_in: data.expires_in,
-            expires_datetime: Date.now() + data.expires_in * 1000
+            accessToken: data.access_token,
+            refreshToken: data.refresh_token,
+            expiresIn: data.expires_in,
+            expiresDatetime: Date.now() + data.expires_in * 1000
         }
 
         delete req.session.generatedState
@@ -119,20 +113,24 @@ router.get('/callback', async (req: Request, res: Response)  => {
 })
 
 router.get('/refresh_token', async (req: Request, res: Response) => {
-    const success = await refresh_token(req)
+    const success = await refreshToken(req)
 
     if (!success) {
-        return res.status(401).json({ ok: false })
+        return res.status(401).json({ 
+            error: {
+                message: 'Failed to refresh token'
+            } 
+        })
     }
     return res.redirect(process.env.FRONTEND_URL ?? 'http://127.0.0.1:5173/')
 })
 
 router.get('/token', async (req: Request, res: Response) => {
-    if (!await check_access_token(req)) {
+    if (!await checkAccessToken(req)) {
         return res.status(401).json({ access_token: null, error: 'not_authenticated' })
     }
     
-    return res.json({ access_token: req.session.spotify_token?.access_token })
+    return res.json({ access_token: req.session.spotify_token?.accessToken })
 })
 
 router.get('/logout', (req: Request, res: Response) => {

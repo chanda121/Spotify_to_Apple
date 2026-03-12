@@ -2,10 +2,10 @@ import { create } from 'zustand'
 import type { StoreApi } from 'zustand'
 import type {
   SpotifyUser,
-  Playlist,
-  Artist,
+  SpotifyPlaylist,
+  SpotifyArtist,
   SpotifyTrack,
-} from '../types/spotify'
+} from '@shared/types/spotify.js'
 
 import { fetchWithAuth } from '../utils/api'
 
@@ -13,8 +13,8 @@ interface SpotifyUserState {
     // Data
     user: SpotifyUser | null,
     topTracks: SpotifyTrack[],
-    topArtists: Artist[],
-    playlists: Playlist[],
+    topArtists: SpotifyArtist[],
+    playlists: SpotifyPlaylist[],
 
     // Loading states
     isLoadingUser: boolean,
@@ -60,7 +60,7 @@ const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn}
         }
     }
 
-export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>((set, get) => ({
+export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>((set) => ({
     user: null,
     topTracks: [],
     topArtists: [],
@@ -107,8 +107,8 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             set,
             loadingKey: 'isLoadingTopArtists',
             errorKey: 'topArtistsError',
-            onSuccess: (data: Artist[]) => {set({ topArtists: data })},
-            asyncFn: () => fetchWithAuth<Artist[]>('/api/user/top-artists')
+            onSuccess: (data: SpotifyArtist[]) => {set({ topArtists: data })},
+            asyncFn: () => fetchWithAuth<SpotifyArtist[]>('/api/user/top-artists')
         })
     },
 
@@ -119,8 +119,8 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             set,
             loadingKey: 'isLoadingPlaylists',
             errorKey: 'playlistsError',
-            onSuccess: (data: Playlist[]) => {set({ playlists: data })},
-            asyncFn: () => fetchWithAuth<Playlist[]>(`/api/user/playlists?limit=${limit}&offset=${offset}`)
+            onSuccess: (data: SpotifyPlaylist[]) => {set({ playlists: data })},
+            asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/user/playlists?limit=${limit}&offset=${offset}`)
         })
     },
     

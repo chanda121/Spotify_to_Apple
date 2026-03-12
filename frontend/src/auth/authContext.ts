@@ -1,7 +1,7 @@
 import { createContext, useContext } from 'react'
 
 type AuthContextType = {
-    status: 'logged_in' | 'logged_out' | 'loading',
+    status: 'loggedIn' | 'loggedOut' | 'loading',
     login: () => void,
     logout: () => Promise<void>
 }

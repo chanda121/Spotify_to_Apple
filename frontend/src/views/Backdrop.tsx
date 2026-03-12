@@ -5,13 +5,12 @@ import { DigitalClock, ProgressBar } from '../components'
 
 export function Backdrop() {
     const fetchSnapshot = useSpotifyPlayerStore((state) => state.fetchSnapshot)
-    const incrementProgress = useSpotifyPlayerStore((state) => state.incrementProgress)
 
-    const isPlaying = useSpotifyPlayerStore((state) => state.snapshot?.is_playing)
-    const apiProgress = useSpotifyPlayerStore((state) => state.local_progress_ms)
+    const isPlaying = useSpotifyPlayerStore((state) => state.snapshot?.isPlaying)
+    const apiProgress = useSpotifyPlayerStore((state) => state.snapshot?.progressMs)
     
     const currTrackName = useSpotifyPlayerStore((state) => state.snapshot?.trackName) //current track name
-    const currTrackDur_ms = useSpotifyPlayerStore((state) => state.snapshot?.trackDuration) //duration in ms
+    const currTrackDurMs = useSpotifyPlayerStore((state) => state.snapshot?.trackDuration) //duration in ms
     const currTrackArtists = useSpotifyPlayerStore((state) => state.snapshot?.artistNames) //artists of song
     const currTrackAlbumCovers = useSpotifyPlayerStore((state) => state.snapshot?.albumImgs) //3 item image array
 
@@ -20,19 +19,25 @@ export function Backdrop() {
 
     const [localProgressMs, setLocalProgressMs ] = useState(apiProgress)
 
+
+
     useEffect(() => {
         const refresh = setInterval(() => {
             fetchSnapshot()
-        }, 3000)
+        }, 5000)
 
         return () => clearInterval(refresh)
     }, [fetchSnapshot])
 
     useEffect(() => {
+        setLocalProgressMs(apiProgress)
+    }, [apiProgress])
+
+    useEffect(() => {
         if (!isPlaying) return
 
         const updateProgress = setInterval(() => {
-            setLocalProgressMs(prev => prev + 100)
+            setLocalProgressMs(prev => (prev??0) + 100)
         }, 100)
 
         return () => clearInterval(updateProgress)
@@ -66,7 +71,7 @@ export function Backdrop() {
                 </div>
                 <div>
                     <ProgressBar 
-                        duration_ms={currTrackDur_ms ?? 0} 
+                        duration_ms={currTrackDurMs ?? 0} 
                         progress_ms={localProgressMs}/>
                 </div>
             </div>                
