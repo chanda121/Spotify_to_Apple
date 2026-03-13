@@ -112,7 +112,7 @@ router.get('/callback', async (req: Request, res: Response)  => {
     }
 })
 
-router.get('/refresh_token', async (req: Request, res: Response) => {
+router.get('/refresh-token', async (req: Request, res: Response) => {
     const success = await refreshToken(req)
 
     if (!success) {

@@ -1,10 +1,10 @@
 
 type ProgressBarProps = {
-    duration_ms: number,
-    progress_ms: number
+    durationMs: number,
+    progressMs: number
 }
 
-export function ProgressBar({duration_ms, progress_ms}: ProgressBarProps) {
+export function ProgressBar({durationMs: duration_ms, progressMs: progress_ms}: ProgressBarProps) {
     const percentFull = duration_ms ? Math.min(100, (progress_ms/duration_ms)*100) : 0
     
     return (

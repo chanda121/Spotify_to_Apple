@@ -45,10 +45,11 @@ export function Backdrop() {
 
     return (
         <div>
-
+            {/* Clock widget */}
             <div className='flex justify-center mx-3'>
                 <DigitalClock/>
             </div>
+            {/* Currently Playing Widget */}
             <div className='max-w-140 m-auto'>
                 <div className='flex items-center gap-3 mb-4'>
                     {/* Album Art */}
@@ -71,8 +72,8 @@ export function Backdrop() {
                 </div>
                 <div>
                     <ProgressBar 
-                        duration_ms={currTrackDurMs ?? 0} 
-                        progress_ms={localProgressMs}/>
+                        durationMs={currTrackDurMs ?? 0} 
+                        progressMs={localProgressMs ?? 100}/>
                 </div>
             </div>                
 

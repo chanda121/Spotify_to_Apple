@@ -5,7 +5,7 @@ import { SpotifyAPIPlaybackSnapshot } from '@shared/types/spotify.js'
 
 const router = express.Router()
 
-router.get('/get_current_track', async (req: Request, res: Response) => {
+router.get('/get-current-track', async (req: Request, res: Response) => {
     if (!await checkAccessToken(req)) {
         return res.status(401).json({ 
             error: {
