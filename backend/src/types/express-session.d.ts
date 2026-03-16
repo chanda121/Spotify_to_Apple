@@ -5,8 +5,8 @@ declare module 'express-session' {
     spotify_token?: { 
         accessToken: string,
         refreshToken: string,
-        expiresIn: number, //seconds
-        expiresDatetime: number //seconds
+        expiresIn: number, //milliseconds
+        expiresDatetime: number //milliseconds
     }
     generatedState?: string
     codeVerifier?: string
