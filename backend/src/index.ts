@@ -13,7 +13,7 @@ const app = express()
 const port = process.env.PORT || 3000
 
 const sessionSecret = process.env.SESSION_SECRET
-if(!sessionSecret) throw new Error('SESSION_SECRET env var is not set')
+if (!sessionSecret) throw new Error('SESSION_SECRET env var is not set')
 
 app.use(session({
     secret: sessionSecret,

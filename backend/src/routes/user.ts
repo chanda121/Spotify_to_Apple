@@ -80,7 +80,7 @@ router.get('/user-info', async (req: Request, res: ExpressResponse) => {
         res,
         url: 'https://api.spotify.com/v1/me',
         onSuccess: (data) => {
-            if(!data) {
+            if (!data) {
                 return res.status(204).send()
             } else {
                 const user: SpotifyUser = {
@@ -106,7 +106,7 @@ router.get('/top-tracks', async (req: Request, res: ExpressResponse) => {
         req, res, 
         url: `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
-            if(!data) {
+            if (!data) {
                 return res.status(204).send()
             }
             const tracks = data.items.map((track: SpotifyAPITrack) => ({
@@ -141,7 +141,7 @@ router.get('/top-artists', async (req: Request, res: ExpressResponse) => {
         req, res,
         url: `https://api.spotify.com/v1/me/top/artists?time_range=${timeRange}&limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
-            if(!data) {
+            if (!data) {
                 return res.status(204).send()
             }
             const artists = data.items.map((artist) => ({
@@ -223,6 +223,9 @@ router.get('/saved-songs', async (req: Request, res: ExpressResponse) => {
         req, res,
         url: `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
+            if (!data) {
+                return res.status(204).send()
+            }
             return res.json(data)
         }
     })

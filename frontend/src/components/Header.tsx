@@ -17,7 +17,7 @@ export function Header() {
 	)
 	let listItems = null
 	
-	if (status === 'logged_in') {
+	if (status === 'loggedIn') {
 		listItems = [...listItemsNav, 
 			<button key='logout-button' onClick={logout}>Logout</button>
 		]		

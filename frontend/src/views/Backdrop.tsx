@@ -73,7 +73,7 @@ export function Backdrop() {
                 <div>
                     <ProgressBar 
                         durationMs={currTrackDurMs ?? 0} 
-                        progressMs={localProgressMs ?? 100}/>
+                        progressMs={localProgressMs ?? 0}/>
                 </div>
             </div>                
 

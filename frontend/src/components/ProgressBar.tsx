@@ -4,8 +4,8 @@ type ProgressBarProps = {
     progressMs: number
 }
 
-export function ProgressBar({durationMs: duration_ms, progressMs: progress_ms}: ProgressBarProps) {
-    const percentFull = duration_ms ? Math.min(100, (progress_ms/duration_ms)*100) : 0
+export function ProgressBar({durationMs: durationMs, progressMs: progressMs}: ProgressBarProps) {
+    const percentFull = durationMs ? Math.min(100, (progressMs/durationMs)*100) : 0
     
     return (
         <div className='w-full bg-black dark:bg-white rounded-full h-1 outline-0.5'>

@@ -1,5 +1,5 @@
-import type { Request } from "express"
-import type { SpotifyAPIToken, SpotifyTokenError } from "@shared/types/spotify.js"
+import type { Request } from 'express'
+import type { SpotifyAPIToken, SpotifyTokenError } from '@shared/types/spotify.js'
 
 const BUFFER = 60000 //60 second buffer
 
@@ -9,7 +9,7 @@ export const refreshToken = async (req: Request): Promise<boolean> => {
 
     try {
         if (!refreshTokenVal) {
-            throw new Error("No refresh token found in session...")
+            throw new Error('No refresh token found in session...')
         }
         if (!process.env.SPOTIFY_CLIENT_ID) {
             throw new Error('Missing SPOTIFY_CLIENT_ID')
@@ -18,7 +18,7 @@ export const refreshToken = async (req: Request): Promise<boolean> => {
         const tokenResponse = await fetch('https://accounts.spotify.com/api/token', {
             method: 'POST',
             headers: {
-                'content-type': 'application/x-www-form-urlencoded'
+                'Content-type': 'application/x-www-form-urlencoded'
             },
             body: new URLSearchParams({
                 client_id: process.env.SPOTIFY_CLIENT_ID,

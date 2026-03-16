@@ -3,7 +3,7 @@ import { fetchWithAuth } from '../utils/api'
 
 import type {
     SpotifyPlaybackSnapshot, 
-} from '@shared/types/spotify'
+} from '@shared/types/spotify.js'
 
 interface SpotifyPlayerState {
     snapshot: SpotifyPlaybackSnapshot | null,
@@ -27,7 +27,10 @@ export const useSpotifyPlayerStore = create<SpotifyPlayerState & SpotifyPlayerAc
             const data = await fetchWithAuth<SpotifyPlaybackSnapshot>('/api/spotify-player/get-current-track')
             set({ snapshot: data })
         } catch (error) {
+            const msg = error instanceof Error ? error.message : 'Unexpected Error'
+            set({ snapshotError: msg })
             console.error(error)
+
         } finally {
             set({ isLoadingSnapshot: false })
         }
