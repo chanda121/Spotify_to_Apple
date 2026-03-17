@@ -36,9 +36,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         checkSession()
 
         window.addEventListener('focus', checkSession)
-        return () => {
-            window.removeEventListener('focus', checkSession)
-        }
+        return () => window.removeEventListener('focus', checkSession)
+        
     }, [resetStore])
 
     // Fetch user data once when logged in

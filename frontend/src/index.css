@@ -5,12 +5,12 @@
 :root {
   /* Theme colors */
   --color-bg: pink;
-  --color-bg-secondary: #3a8ff0a1;
+  --color-bg-secondary: #e442d6a1;
   --color-text: #0a001b;
   --color-text-muted: #6b7280;
-  --color-accent: #4d51a0;
-  --color-accent-hover: #535bf2;
-  --color-border: #5336f8;
+  --color-accent: #6d0970;
+  --color-accent-hover: #520948;
+  --color-border: #0b0724;
 
   font-family: Helvetica, Avenir, system-ui, Arial, sans-serif;
   line-height: 1.5;
@@ -24,6 +24,8 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  scroll-behavior: smooth;
 }
 
 .dark {
@@ -45,10 +47,12 @@ body {
 }
 a {
   font-weight: 500;
-  color: var(--color-accent);
+  color: var(--color-text);
   text-decoration: inherit;
 }
 a:hover {
+  border-color: var(--color-accent-hover);
+  background-color: var(--color-bg-secondary);
   cursor: pointer;
 }
 h1 {
@@ -70,7 +74,7 @@ button {
   line-height: 1
 }
 button:hover {
-  border-color: var(--color-accent);
+  border-color: var(--color-accent-hover);
   background-color: var(--color-bg-secondary);
 }
 button:focus {
