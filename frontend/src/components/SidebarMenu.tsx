@@ -8,7 +8,7 @@ export function SideBarMenu({ items }: SideBarProps) {
     const activeId = useScrollSpy(items.map(item => item.id))
 
     return (
-        <nav className='flex flex-col w-30 fixed space-y-2'>
+        <nav className='flex-col w-30 fixed space-y-2 hidden lg:flex'>
             {
                 items.map((item) => (
                     <a
