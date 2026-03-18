@@ -91,11 +91,6 @@ button:focus-visible {
   align-items: center;
 }
 
-.header-menu-items {
-  display: flex;
-  flex-direction: row;
-}
-
 .header-nav-link {
   display: inline-block;
   text-align: center;
@@ -131,20 +126,4 @@ button:focus-visible {
   right: 0; /*right alignment*/
   top: 100%;
   z-index: 10;
-}
-
-.header-hamburger-button {
-  display: none;
-  position: relative;
-}
-
-@media (max-width: 64rem){
-  .header-hamburger-button {
-    display:flex;
-    position: relative;
-  }
-
-  .header-menu-items {
-    display:none;
-  }
 }

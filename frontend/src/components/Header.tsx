@@ -31,13 +31,13 @@ return (
 	<div className='logo'>
 		<Link to='/'>DANNY'S SPOTIFY VIEWER</Link>
 	</div>
-	<div className='header-menu-items'>
+	<div className='lg:flex hidden'>
 		<nav className='p-2'>
 			{listItems}
 		</nav>
 		<ThemeToggle/>
 	</div>
-	<div className='header-hamburger-button' 
+	<div className='flex lg:hidden relative' 
 		 onMouseEnter={()=>setHamburgerOpen(true)}
 		 onMouseLeave={()=>setHamburgerOpen(false)}>
 		<button>
