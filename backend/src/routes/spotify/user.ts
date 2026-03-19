@@ -1,7 +1,7 @@
 import express from 'express'
 import type { Request, Response as ExpressResponse } from 'express'
-import type { SpotifyApiUser, SpotifyUser, SpotifyAPITrack, SpotifyTrack, SpotifyArtist, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '@shared/types/spotify.js'
-import { checkAccessToken } from '../utils/utils.js'
+import type { SpotifyApiUser, SpotifyUser, SpotifyAPITrack, SpotifyArtist, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '@shared/types/spotify.js'
+import { checkAccessToken } from '../../utils/utils.js'
 
 const router = express.Router()
 

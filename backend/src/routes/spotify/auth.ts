@@ -2,7 +2,7 @@ import express from 'express'
 import type { Request, Response } from 'express'
 import crypto from 'crypto'
 import { SpotifyAPIToken, SpotifyTokenError } from '@shared/types/spotify.js'
-import { refreshToken, checkAccessToken } from '../utils/utils.js'
+import { refreshToken, checkAccessToken } from '../../utils/utils.js'
 
 
 

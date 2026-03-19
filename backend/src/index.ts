@@ -2,9 +2,9 @@ import express from 'express'
 import session from 'express-session'
 import createError, { HttpError } from 'http-errors'
 
-import userRouter from './routes/user.js'
-import authRouter from './routes/auth.js'
-import spotifyPlayerRouter from './routes/spotifyPlayer.js'
+import spotifyUserRouter from './routes/spotify/user.js'
+import spotifyAuthRouter from './routes/spotify/auth.js'
+import spotifyPlayerRouter from './routes/spotify/player.js'
 
 import type { Response, Request, NextFunction } from 'express'
 
@@ -22,8 +22,8 @@ app.use(session({
     cookie: { secure: false }
 }))
 
-app.use('/api/user', userRouter)
-app.use('/api/auth', authRouter)
+app.use('/api/user', spotifyUserRouter)
+app.use('/api/auth', spotifyAuthRouter)
 app.use('/api/spotify-player', spotifyPlayerRouter)
 
 app.get('/', (req: Request, res: Response) => {

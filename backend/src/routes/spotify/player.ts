@@ -1,6 +1,6 @@
 import express from 'express'
 import type { Request, Response } from 'express'
-import { checkAccessToken }  from '../utils/utils.js'
+import { checkAccessToken }  from '../../utils/utils.js'
 import { SpotifyAPIPlaybackSnapshot } from '@shared/types/spotify.js'
 
 const router = express.Router()
