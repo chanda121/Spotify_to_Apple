@@ -1,12 +1,12 @@
 import express from 'express'
 import session from 'express-session'
-import createError, { HttpError } from 'http-errors'
+
+import { notFoundHandler, errorHandler } from './middleware/errorHandler.js'
 
 import spotifyUserRouter from './routes/spotify/user.js'
 import spotifyAuthRouter from './routes/spotify/auth.js'
 import spotifyPlayerRouter from './routes/spotify/player.js'
 
-import type { Response, Request, NextFunction } from 'express'
 
 const app = express()
 
@@ -22,24 +22,13 @@ app.use(session({
     cookie: { secure: false }
 }))
 
+//TODO: CHANGE TO /api/spotify/...
 app.use('/api/user', spotifyUserRouter)
 app.use('/api/auth', spotifyAuthRouter)
 app.use('/api/spotify-player', spotifyPlayerRouter)
 
-app.get('/', (req: Request, res: Response) => {
-    res.send('Hello World')
-})
-
-app.use((req: Request, res: Response, next: NextFunction) => {
-    console.log(`404 for ${req.originalUrl}`)
-    next(createError(404))
-})
-//error handler
-app.use((err: HttpError, req: Request, res: Response, next: NextFunction) => {
-    console.error(err)
-    res.status(err.status || 500);
-    res.json(err.status==404 ? { error: { message: 'Not Found' } } : { error: { message: 'Internal Server Error' } })
-})
+app.use(notFoundHandler)
+app.use(errorHandler)
 
 app.listen(port, () => {
     console.log(`Example app listening on port ${port}!`)
