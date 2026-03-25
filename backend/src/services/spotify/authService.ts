@@ -8,7 +8,7 @@ const clientId = process.env.SPOTIFY_CLIENT_ID
 const redirectAuthUri = process.env.SPOTIFY_REDIRECT_URI
 
 export const refreshToken = async (req: Request): Promise<boolean> => {
-    const refreshTokenVal = req.session.spotify_token ? req.session.spotify_token.refreshToken : null
+    const refreshTokenVal = req.session.spotifyToken ? req.session.spotifyToken.refreshToken : null
 
     try {
         if (!refreshTokenVal) {
@@ -40,7 +40,7 @@ export const refreshToken = async (req: Request): Promise<boolean> => {
 
         if ('error' in data) return false
         
-        req.session.spotify_token = {
+        req.session.spotifyToken = {
             accessToken: data.access_token,
             refreshToken: data.refresh_token ?? refreshTokenVal ?? '',
             expiresIn: data.expires_in,
@@ -61,9 +61,9 @@ export const refreshToken = async (req: Request): Promise<boolean> => {
  * Returns false if no token exists or refresh fails.
  */
 export const checkAccessToken = async (req: Request): Promise<boolean> => {
-    if (!req.session.spotify_token) return false
+    if (!req.session.spotifyToken) return false
 
-    if (Date.now() > req.session.spotify_token.expiresDatetime - BUFFER) {
+    if (Date.now() > req.session.spotifyToken.expiresDatetime - BUFFER) {
         const success = await refreshToken(req)
 
         return success
@@ -134,7 +134,7 @@ export const handleCallback = async (req: Request, res: Response)  => {
             return res.redirect(`/?${errorParams.toString()}`)
         }
         
-        req.session.spotify_token = {
+        req.session.spotifyToken = {
             accessToken: data.access_token,
             refreshToken: data.refresh_token,
             expiresIn: data.expires_in,
@@ -146,13 +146,17 @@ export const handleCallback = async (req: Request, res: Response)  => {
 
         return res.redirect(process.env.FRONTEND_URL ?? 'http://127.0.0.1:5173/')
     } catch (error) {
-        console.error('Token exchange error:', error)
-        return res.status(500).json({ error: 'Failed to exchange token' })
+        console.error('Error getting token', error)
+        return res.status(500).json({ 
+            error: {
+                message: 'Failed to get Spotify Token' 
+            }
+        })
     }
 }
 
 export const logout = (req: Request, res: Response) => {
-    delete req.session.spotify_token
+    delete req.session.spotifyToken
     delete req.session.generatedState
     delete req.session.codeVerifier
 

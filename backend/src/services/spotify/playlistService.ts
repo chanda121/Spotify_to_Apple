@@ -3,7 +3,7 @@ import type { SpotifyAPITrack, SpotifyAPIPlaylist, SpotifyItemsResponse, Spotify
 import type { Request, Response } from 'express'
 
 export const getPlaylists = async (req: Request, res: Response) => {
-    const accessToken = req.session.spotify_token?.accessToken
+    const accessToken = req.session.spotifyToken?.accessToken
     const limit = Number(req.query.limit) || 50
     const offset = Number(req.query.offset) || 0
     try {

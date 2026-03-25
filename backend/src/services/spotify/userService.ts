@@ -5,9 +5,8 @@ import type { Request, Response } from 'express'
 
 
 export const getSession = async (req: Request, res: Response) => {
-    if (req.session.spotify_token && await checkAccessToken(req)) {
+    if (req.session.spotifyToken && await checkAccessToken(req)) {
         return res.json({loggedIn: true})
-
     } else {
         return res.json({loggedIn: false})
     }
