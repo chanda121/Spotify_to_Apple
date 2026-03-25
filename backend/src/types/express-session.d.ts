@@ -2,7 +2,7 @@ import 'express-session';
 
 declare module 'express-session' {
   interface SessionData {
-    spotify_token?: { 
+    spotifyToken?: { 
         accessToken: string,
         refreshToken: string,
         expiresIn: number, //milliseconds
@@ -10,5 +10,7 @@ declare module 'express-session' {
     }
     generatedState?: string
     codeVerifier?: string
+    appleDevToken?: string
+    appleMusicUserToken?: string
   }
 }

@@ -9,7 +9,7 @@ export const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
         onSuccess: (data: T | null) => ExpressResponse
     }): Promise<ExpressResponse | void> => {
 
-        const accessToken = req.session.spotify_token?.accessToken
+        const accessToken = req.session.spotifyToken?.accessToken
 
         try {
             const response = await fetch(url, {
