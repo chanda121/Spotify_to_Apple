@@ -22,10 +22,9 @@ app.use(session({
     cookie: { secure: false }
 }))
 
-//TODO: CHANGE TO /api/spotify/...
-app.use('/api/user', spotifyUserRouter)
-app.use('/api/auth', spotifyAuthRouter)
-app.use('/api/spotify-player', spotifyPlayerRouter)
+app.use('/api/spotify/user', spotifyUserRouter)
+app.use('/api/spotify/auth', spotifyAuthRouter)
+app.use('/api/spotify/player', spotifyPlayerRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)

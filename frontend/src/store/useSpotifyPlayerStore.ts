@@ -24,7 +24,7 @@ export const useSpotifyPlayerStore = create<SpotifyPlayerState & SpotifyPlayerAc
     fetchSnapshot: async () => {
         set({ isLoadingSnapshot: true, snapshotError: null })
         try {
-            const data = await fetchWithAuth<SpotifyPlaybackSnapshot>('/api/spotify-player/get-current-track')
+            const data = await fetchWithAuth<SpotifyPlaybackSnapshot>('/api/spotify/player/get-current-track')
             set({ snapshot: data })
         } catch (error) {
             const msg = error instanceof Error ? error.message : 'Unexpected Error'

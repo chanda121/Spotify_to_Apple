@@ -8,14 +8,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const resetStore = useSpotifyUserStore((state) => state.reset)
 
     const logout = async (): Promise<void> => {
-        await fetch('/api/auth/logout')
+        await fetch('/api/spotify/auth/logout')
         resetStore() // Clear all cached data
         setStatus('loggedOut')
         window.location.href = 'http://127.0.0.1:5173/'
     }
 
     const login = () => {
-        window.location.href = '/api/auth'
+        window.location.href = '/api/spotify/auth'
     }
     const fetchUser = useSpotifyUserStore((state) => state.fetchUser)
     const fetchTopTracks = useSpotifyUserStore((state) => state.fetchTopTracks)
@@ -24,7 +24,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     //set status here
     useEffect( () => {
         const checkSession = async () => {
-            const response = await fetch('/api/user/session')
+            const response = await fetch('/api/spotify/user/session')
             const data = await response.json()
             if (data.loggedIn) {
                 setStatus('loggedIn')

@@ -86,7 +86,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             onSuccess: (data: SpotifyUser) => {
                 set({ user: data })
             },
-            asyncFn: () => fetchWithAuth<SpotifyUser>('/api/user/user-info')
+            asyncFn: () => fetchWithAuth<SpotifyUser>('/api/spotify/user/user-info')
         })
     },
 
@@ -98,7 +98,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             onSuccess: (data: SpotifyTrack[]) => {
                 set({ topTracks: data })
             },
-            asyncFn: () => fetchWithAuth<SpotifyTrack[]>('/api/user/top-tracks')
+            asyncFn: () => fetchWithAuth<SpotifyTrack[]>('/api/spotify/user/top-tracks')
         })
     },
 
@@ -108,7 +108,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             loadingKey: 'isLoadingTopArtists',
             errorKey: 'topArtistsError',
             onSuccess: (data: SpotifyArtist[]) => {set({ topArtists: data })},
-            asyncFn: () => fetchWithAuth<SpotifyArtist[]>('/api/user/top-artists')
+            asyncFn: () => fetchWithAuth<SpotifyArtist[]>('/api/spotify/user/top-artists')
         })
     },
 
@@ -120,7 +120,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             loadingKey: 'isLoadingPlaylists',
             errorKey: 'playlistsError',
             onSuccess: (data: SpotifyPlaylist[]) => {set({ playlists: data })},
-            asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/user/playlists?limit=${limit}&offset=${offset}`)
+            asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/spotify/user/playlists?limit=${limit}&offset=${offset}`)
         })
     },
     
