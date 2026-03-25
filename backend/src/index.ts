@@ -29,8 +29,6 @@ app.use('/api/spotify/player', spotifyPlayerRouter)
 
 app.use('/api/apple/auth', appleAuthRouter)
 
-app.use('/api/apple/auth', appleAuthRouter)
-
 app.use(notFoundHandler)
 app.use(errorHandler)
 
