@@ -34,7 +34,7 @@ export function Stats() {
                     {!userLoading &&
                         <div>
                             {user && 
-                            Object.entries(user).map(([key, value]) => (
+                            Object.entries(user).filter(([key]) => key !== 'images').map(([key, value]) => (
                                 <div key={key} className='flex justify-between py-1 border-b last:border-0 border-black/20 dark:border-white/20'>
                                     <span className='capitalize'>{key}</span>
                                     <span className='font-medium'>{value}</span>
