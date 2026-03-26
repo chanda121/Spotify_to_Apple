@@ -26,6 +26,10 @@ type devToken = {
     devToken: string
 }
 
+type placeholder = {
+
+}
+
 export const useAppleStore = create<AppleState | AppleAction>((set) => ({
     musicKitConfigured: false,
     isLoadingMusicKit: false,
@@ -45,16 +49,18 @@ export const useAppleStore = create<AppleState | AppleAction>((set) => ({
 
     },
 
-    fetchPlaylists: () => {
+    fetchPlaylists: async () => {
+        const data = await fetchWithAuth<placeholder>('/api/apple/user/playlists')
 
     },
 
-    fetchLikedSongs: () => {
+    fetchLikedSongs: async () => {
+        const data = await fetchWithAuth<placeholder>('/api/apple/user/liked-songs')
 
     },
 
     getDevToken: async () => {
-        const data = await fetchWithAuth<devToken>('/api/apple/dev-token')
+        const data = await fetchWithAuth<devToken>('/api/apple/auth/dev-token')
 
         return data.devToken
     }

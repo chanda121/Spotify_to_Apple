@@ -8,6 +8,7 @@ import spotifyAuthRouter from './routes/spotify/auth.js'
 import spotifyPlayerRouter from './routes/spotify/player.js'
 
 import appleAuthRouter from './routes/apple/auth.js'
+import appleUserRouter from './routes/apple/user.js'
 
 const app = express()
 
@@ -28,6 +29,7 @@ app.use('/api/spotify/auth', spotifyAuthRouter)
 app.use('/api/spotify/player', spotifyPlayerRouter)
 
 app.use('/api/apple/auth', appleAuthRouter)
+app.use('/api/apple/user', appleUserRouter)
 
 app.use(notFoundHandler)
 app.use(errorHandler)
