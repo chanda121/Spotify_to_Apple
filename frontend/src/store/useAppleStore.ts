@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { fetchWithAuth } from '../utils/api.js'
 import type { ApplePlaylist } from '@shared/types/apple.js'
 
 interface AppleState {
@@ -18,6 +19,11 @@ interface AppleAction {
     authorize: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
     fetchLikedSongs: () => Promise<void>,
+    getDevToken: () => string
+}
+
+type devToken = {
+    devToken: string
 }
 
 export const useAppleStore = create<AppleState | AppleAction>((set) => ({
@@ -32,7 +38,7 @@ export const useAppleStore = create<AppleState | AppleAction>((set) => ({
     playlistError: null,
 
     initializeMusicKit: () => {
-
+        
     },
 
     authorize: () => {
@@ -44,8 +50,13 @@ export const useAppleStore = create<AppleState | AppleAction>((set) => ({
     },
 
     fetchLikedSongs: () => {
-        
-    }
 
+    },
+
+    getDevToken: async () => {
+        const data = await fetchWithAuth<devToken>('/api/apple/dev-token')
+
+        return data.devToken
+    }
 
 }))
