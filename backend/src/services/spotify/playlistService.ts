@@ -63,3 +63,7 @@ export const getSavedSongs = async (req: Request, res: Response) => {
         }
     })
 }
+
+export const getPlaylistTracks = async (req: Request, res: Response) => {
+    const hrefArr = req.body
+}

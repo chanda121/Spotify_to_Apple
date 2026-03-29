@@ -15,6 +15,8 @@ router.get('/top-artists', requireSpotifyAuth, getTopArtists)
 
 router.get('/playlists', requireSpotifyAuth, getPlaylists)
 
+router.get('/playlists/tracks', requireSpotifyAuth, getPlaylistTracks)
+
 router.get('/saved-songs', requireSpotifyAuth, getSavedSongs)
 
 export default router
