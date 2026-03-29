@@ -1,6 +1,6 @@
 import express from 'express'
 import { getSession, getUserInfo, getTopArtists, getTopTracks } from '../../services/spotify/userService.js'
-import { getPlaylists, getLikedSongs, getPlaylistTracks } from '../../services/spotify/playlistService.js'
+import { getPlaylists, getSavedSongs, getPlaylistTracks } from '../../services/spotify/playlistService.js'
 import { requireSpotifyAuth } from '../../middleware/requireAuth.js'
 
 const router = express.Router()
@@ -15,8 +15,12 @@ router.get('/top-artists', requireSpotifyAuth, getTopArtists)
 
 router.get('/playlists', requireSpotifyAuth, getPlaylists)
 
+
+
+
+
 router.get('/playlists/:id', requireSpotifyAuth, getPlaylistTracks)
 
-router.get('/liked-songs', requireSpotifyAuth, getLikedSongs)
+router.get('/liked-songs', requireSpotifyAuth, getSavedSongs)
 
 export default router
