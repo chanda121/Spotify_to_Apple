@@ -66,3 +66,9 @@ export const getPlaylists = async (req: Request, res: Response) => {
 export const getLikedSongs = (req: Request, res: Response) => {
 
 }
+
+export const getPlaylistTracks = async (req: Request, res: Response) => {
+    const href = req.body.tracksHref
+
+    
+}
