@@ -40,9 +40,17 @@ export const getToken = async (req: Request, res: Response) => {
 }
 
 export const saveToken = (req: Request, res: Response) => {
-    const { musicUserToken } = req.body
+    if(!req.body) {        
+        return res.status(500).json({
+            error: {
+                message: 'invalid music token...'
+            }
+        })}
+    const mutData = req.body
+
+    console.log(mutData)
     
-    req.session.appleMusicUserToken = musicUserToken
+    req.session.appleMusicUserToken = mutData.musicUserToken
     
     res.json({ ok: true })
 }

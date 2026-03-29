@@ -1,9 +1,9 @@
 import express from 'express'
-import { getPlaylists, getLikedSongs } from '../../services/apple/userService.js'
+import { getPlaylists, getLikedSongs } from '../../services/apple/playlistService.js'
 
 const router = express.Router()
 
-router.get('/playlists', getPlaylists)
+router.get('/all', getPlaylists)
 
 router.get('/liked-songs', getLikedSongs)
 
