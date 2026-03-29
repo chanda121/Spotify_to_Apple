@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react'
 import { AuthContext } from './authContext'
 import { useSpotifyUserStore } from '../store/useSpotifyUserStore'
+import { useAppleStore } from '../store/useAppleStore'
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [status, setStatus] = useState<'loggedIn' | 'loggedOut' | 'loading'>('loading')
 
-    const resetStore = useSpotifyUserStore((state) => state.reset)
+    const resetStore = useSpotifyUserStore(state => state.reset)
+    const initializeMusicKit = useAppleStore(state => state.initializeMusicKit)
 
     const logout = async (): Promise<void> => {
         await fetch('/api/spotify/auth/logout')
@@ -20,6 +22,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const fetchUser = useSpotifyUserStore((state) => state.fetchUser)
     const fetchTopTracks = useSpotifyUserStore((state) => state.fetchTopTracks)
     const fetchTopArtists = useSpotifyUserStore((state) => state.fetchTopArtists)
+    const fetchPlaylists = useSpotifyUserStore((state) => state.fetchPlaylists)
 
     //set status here
     useEffect( () => {
@@ -46,8 +49,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             void fetchUser()
             void fetchTopTracks()
             void fetchTopArtists()
+            void fetchPlaylists()
+            void initializeMusicKit()
         }
-    }, [status, fetchUser, fetchTopTracks, fetchTopArtists])
+    }, [status, fetchUser, fetchTopTracks, fetchTopArtists, initializeMusicKit])
 
     return <AuthContext.Provider value={ {status, login, logout} }>
         { children }

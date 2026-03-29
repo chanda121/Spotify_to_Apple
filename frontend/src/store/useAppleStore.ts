@@ -19,7 +19,7 @@ interface AppleAction {
     authorize: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
     fetchLikedSongs: () => Promise<void>,
-    getDevToken: () => string
+    getDevToken: () => Promise<string>
 }
 
 type devToken = {
@@ -27,10 +27,10 @@ type devToken = {
 }
 
 type placeholder = {
-
+    data: string
 }
 
-export const useAppleStore = create<AppleState | AppleAction>((set) => ({
+export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
     musicKitConfigured: false,
     isLoadingMusicKit: false,
     musicKitError: null,
@@ -41,22 +41,69 @@ export const useAppleStore = create<AppleState | AppleAction>((set) => ({
     isLoadingPlaylists: false,
     playlistError: null,
 
-    initializeMusicKit: () => {
-        
+    initializeMusicKit: async () => {
+        set({ isLoadingMusicKit: true, musicKitError: null })
+        try {
+            await new Promise<void>((resolve, reject) => {
+                if(document.getElementById('music-kit-script')) {
+                    resolve()
+                    return
+                }
+                const script = document.createElement('script')
+                script.id = 'music-kit-script'
+                script.src = 'https://js-cdn.music.apple.com/musickit/v3/musickit.js'
+
+                script.onload = () => resolve()
+                script.onerror = () => reject()
+
+                document.head.appendChild(script)
+            })
+
+            const devToken = await get().getDevToken()
+
+            if(!window.MusicKit) throw new Error('Music Kit failed to load!')
+                await window.MusicKit.configure({
+                    developerToken: devToken,
+                    app: {name: 'S2A'}
+                })
+            
+
+        } catch (err) {
+            const msg = err instanceof Error ? err.message : 'Unexepected error while initializing Music Kit'
+            set({ musicKitError: msg })
+            console.error(err)
+        } finally {
+            set({ isLoadingMusicKit: false })
+        }
+
     },
 
-    authorize: () => {
+    authorize: async () => {
+        const musicKit = window.MusicKit?.getInstance()
 
+        const mut = await musicKit?.authorize()
+
+        const postData = { musicUserToken: mut }
+
+        const res = await fetch('/api/apple/auth/save-token', {
+            method: 'POST',
+            credentials: 'include',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(postData)
+        })
+
+        const message = await res.json()
+
+        if(!res.ok) console.error('error authorizing', message)
     },
 
     fetchPlaylists: async () => {
-        const data = await fetchWithAuth<placeholder>('/api/apple/user/playlists')
-
+        const data = await fetchWithAuth<placeholder>('/api/apple/playlists/all')
+        console.log(data)
     },
 
     fetchLikedSongs: async () => {
         const data = await fetchWithAuth<placeholder>('/api/apple/user/liked-songs')
-
     },
 
     getDevToken: async () => {
