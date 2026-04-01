@@ -27,7 +27,8 @@ export interface SpotifyPlaylist {
     name: string,
     ownerId: string,
     ownerName: string,
-    tracksHref: string
+    tracksHref: string,
+    images?: Image[]
 }
 
 export interface SpotifyAPIPlaylist {

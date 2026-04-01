@@ -34,7 +34,8 @@ export const getPlaylists = async (req: Request, res: Response) => {
                 name: playlist.name,
                 ownerId: playlist.owner.id,
                 ownerName: playlist.owner.display_name,
-                tracksHref: playlist.items.href
+                tracksHref: playlist.items.href,
+                images: playlist.images
             }))
 
         return res.json(playlists)

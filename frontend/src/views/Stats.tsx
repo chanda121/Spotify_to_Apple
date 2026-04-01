@@ -17,7 +17,7 @@ export function Stats() {
     const topArtistsError = useSpotifyUserStore((state) => state.topArtistsError)
     const topArtistsLoading = useSpotifyUserStore((state) => state.isLoadingTopArtists)
 
-    const ARTIST_IMG_SIZE = 160
+    const ARTIST_IMG_SIZE = 150
 
     const SIDEBAR_SECTIONS = [
         {id: 'user-stats', label: 'User Stats'},
@@ -91,9 +91,7 @@ export function Stats() {
 
                                         {
                                             artist.images?.length && artist.images[2] &&
-                                            <img src={artist.images[2]?.url}
-                                                // width={artist.images[2]?.width} 
-                                                // height={artist.images[2]?.height}
+                                            <img src={artist.images[1]?.url}
                                                 width={ARTIST_IMG_SIZE}
                                                 height={ARTIST_IMG_SIZE}
                                                 alt={artist.name}

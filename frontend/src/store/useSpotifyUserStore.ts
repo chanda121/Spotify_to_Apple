@@ -33,6 +33,7 @@ interface SpotifyUserAction {
     fetchTopTracks: () => Promise<void>,
     fetchTopArtists: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
+    fetchPlaylistItems: (playlistHref: string) => Promise<void>,
     clearErrors: () => void,
     reset: () => void
 }
@@ -60,7 +61,7 @@ const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn}
         }
     }
 
-export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>((set) => ({
+export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>((set, get) => ({
     user: null,
     topTracks: [],
     topArtists: [],
@@ -122,6 +123,10 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             onSuccess: (data: SpotifyPlaylist[]) => {set({ playlists: data })},
             asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/spotify/user/playlists?limit=${limit}&offset=${offset}`)
         })
+    },
+
+    fetchPlaylistItems: async (playlistHref) => {
+        console.log(playlistHref)
     },
     
     clearErrors: () => {
