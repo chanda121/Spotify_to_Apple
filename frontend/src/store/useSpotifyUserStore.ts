@@ -21,19 +21,21 @@ interface SpotifyUserState {
     isLoadingTopTracks: boolean,
     isLoadingTopArtists: boolean,
     isLoadingPlaylists: boolean,
+    isLoadingPlaylist: boolean,
 
     // Error states
     userError: string | null,
     topTracksError: string | null,
     topArtistsError: string | null,
     playlistsError: string | null,
+    playlistError: string | null,
 }
 interface SpotifyUserAction {
     fetchUser: () => Promise<void>,
     fetchTopTracks: () => Promise<void>,
     fetchTopArtists: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
-    fetchPlaylistItems: (playlistHref: string) => Promise<void>,
+    fetchPlaylistItems: (playlist: SpotifyPlaylist) => Promise<void>,
     clearErrors: () => void,
     reset: () => void
 }
@@ -72,12 +74,14 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     isLoadingTopTracks: false,
     isLoadingTopArtists: false,
     isLoadingPlaylists: false,
+    isLoadingPlaylist: false,
 
     // Error states
     userError: null,
     topTracksError: null,
     topArtistsError: null,
     playlistsError: null,
+    playlistError: null,
 
     fetchUser: async () => {
         await runAsyncAction({
@@ -116,6 +120,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     fetchPlaylists: async () => {
         const limit = 10
         const offset = 0
+
         await runAsyncAction({
             set,
             loadingKey: 'isLoadingPlaylists',
@@ -125,8 +130,17 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
         })
     },
 
-    fetchPlaylistItems: async (playlistHref) => {
-        console.log(playlistHref)
+    fetchPlaylistItems: async (playlist) => {
+        console.log(playlist)
+        await runAsyncAction({
+            set,
+            loadingKey: 'isLoadingPlaylist',
+            errorKey: 'playlistError',
+            onSuccess: (data: SpotifyTrack[]) => {
+                console.log(data)
+            },
+            asyncFn: () => fetchWithAuth<SpotifyTrack[]>(`/api/spotify/playlist/${playlist.id}`)
+        })
     },
     
     clearErrors: () => {

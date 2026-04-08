@@ -1,7 +1,8 @@
 
 import type { Request, Response as ExpressResponse } from 'express'
+import type { SpotifyItemsResponse } from '@shared/types/spotify.js'
 
-export const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
+export const fetchWithAuth = async <T>({req, res, url, onSuccess}:
     {
         req: Request
         res: ExpressResponse
@@ -9,13 +10,14 @@ export const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
         onSuccess: (data: T | null) => ExpressResponse
     }): Promise<ExpressResponse | void> => {
 
-        const accessToken = req.session.spotifyToken?.accessToken
+        const spotifyToken = req.session.spotifyToken
+        if (!spotifyToken) {
+            return res.status(401).json({ error: { message: 'No token' } })
+        }
+        const accessToken = spotifyToken.accessToken
 
         try {
-            const response = await fetch(url, {
-                method: 'GET',
-                headers: { 'Authorization': `Bearer ${accessToken}` }
-            })
+            const response = await fetchUrl(url, accessToken)
             if (response.status === 204) {
                 return onSuccess(null)
             }
@@ -32,7 +34,54 @@ export const fetchWithAuth =  async <T>({req, res, url, onSuccess}:
                 }
             })
         }
-    }
+}
+
+export const fetchAllPages = async <T>({req, res, url, onSuccess}:
+    {
+        req: Request
+        res: ExpressResponse
+        url: string
+        onSuccess: (data: T[] | null) => ExpressResponse
+    }): Promise<ExpressResponse | void> => {
+        try {
+            const spotifyToken = req.session.spotifyToken
+            if (!spotifyToken) {
+                return res.status(401).json({ error: { message: 'No token' } })
+            }
+            const accessToken = spotifyToken.accessToken
+
+            let response = await fetchUrl(url, accessToken)
+            if(!await checkAPIResponse(response, res)) return
+
+            let initData = await response.json() as SpotifyItemsResponse<T>
+            let jsonResponse = initData.items
+
+            while (initData.next) {
+                response = await fetchUrl(initData.next, accessToken)
+                if(!await checkAPIResponse(response, res)) return
+
+                initData = await response.json() as SpotifyItemsResponse<T>
+                jsonResponse = jsonResponse.concat(initData.items)
+            }
+
+            return onSuccess(jsonResponse)
+
+        } catch (error) {
+            console.error(`get query error: ${error}`)
+            return res.status(500).json({
+                error: {
+                    message: 'Failed to get query'
+                }
+            })   
+        }
+}
+
+const fetchUrl = async (url:string, accessToken:string) => {
+    return await fetch(url, {
+        method: 'GET',
+        headers: { 'Authorization': `Bearer ${accessToken}`}
+    })
+}
 
 /**
  * 
@@ -53,3 +102,4 @@ export const checkAPIResponse = async (fetchRes: Response, expressRes: ExpressRe
     }
     return true
 }
+

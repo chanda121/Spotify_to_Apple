@@ -6,18 +6,23 @@ export function Transfer() {
     const PLAYLIST_IMG_SIZE = 60
 
     const authorize = useAppleStore(state => state.authorize)
-    const fetchPlaylists = useAppleStore(state => state.fetchPlaylists)
+    const fetchApplePlaylists = useAppleStore(state => state.fetchPlaylists)
 
     const spotifyPlaylists = useSpotifyUserStore(state => state.playlists)
-    console.log(spotifyPlaylists)
+    const fetchSpotifyPlaylists = useSpotifyUserStore(state => state.fetchPlaylists)
+    const fetchPlaylistItems = useSpotifyUserStore(state =>  state.fetchPlaylistItems)
 
     const displayPlaylists = () => {
         if (!spotifyPlaylists.length) {
             return <div>No Playlists Yet</div>
         }
-        console.log(spotifyPlaylists.map(playlist => playlist.images))
         return spotifyPlaylists.map((playlist) => (
-            <div className='flex gap-2 items-center p-2 rounded-lg hover:bg-gray-900/10 dark:hover:bg-white/10' key={playlist.id}>
+            <div className='flex gap-2 items-center p-2 rounded-lg hover:bg-gray-900/10 dark:hover:bg-white/10' 
+                 key={playlist.id}
+                 onClick={() => {
+                    fetchPlaylistItems(playlist)
+                 }}
+                >
                 {
                     playlist.images ? 
                     <img src={playlist.images[0]?.url}
@@ -47,8 +52,11 @@ export function Transfer() {
                 await authorize()
             }}>Authorize Apple</button>
             <button onClick={async () => {
-                await fetchPlaylists()
-            }}>Get playlists</button>
+                await fetchApplePlaylists()
+            }}>Get A playlists</button>
+            <button onClick={async () => {
+                await fetchSpotifyPlaylists()
+            }}>Get S playlists</button>
 
             <div className='flex gap-1'>
                 <div id='spotify-playlist-col' className='flex flex-col gap-2 grow p-2'>

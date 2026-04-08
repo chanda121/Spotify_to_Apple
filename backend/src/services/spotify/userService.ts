@@ -36,7 +36,7 @@ export const getUserInfo = async (req: Request, res: Response) => {
 }
 
 export const getTopTracks = async (req: Request, res: Response) => {
-    const timeRange = req.query.time_range || 'short_term'
+    const timeRange = req.query.time_range || 'long_term'
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
 
@@ -72,7 +72,7 @@ export const getTopTracks = async (req: Request, res: Response) => {
 }
 
 export const getTopArtists = async (req: Request, res: Response) => {
-    const timeRange = req.query.time_range || 'short_term'
+    const timeRange = req.query.time_range || 'long_term'
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
     await fetchWithAuth<SpotifyItemsResponse<SpotifyArtist>>({
