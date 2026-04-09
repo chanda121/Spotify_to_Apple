@@ -52,7 +52,7 @@ export const getPlaylistTracks = async (req: Request, res: Response) => {
     const limit = Number(req.query.limit) || 50
     const offset = Number(req.query.offset) || 0
 
-    await fetchWithAuth<SpotifyItemsResponse<SpotifyAPIPlaylist>>({
+    await fetchAllPages<SpotifyItemsResponse<SpotifyAPIPlaylist>>({
         req, res,
         url: `https://api.spotify.com/v1/playlists/${id}/items?limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
