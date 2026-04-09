@@ -131,15 +131,15 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     },
 
     fetchPlaylistItems: async (playlist) => {
-        console.log(playlist)
+        console.log('playlist: ', playlist)
         await runAsyncAction({
             set,
             loadingKey: 'isLoadingPlaylist',
             errorKey: 'playlistError',
             onSuccess: (data: SpotifyTrack[]) => {
-                console.log(data)
+                console.log('track data: ', data)
             },
-            asyncFn: () => fetchWithAuth<SpotifyTrack[]>(`/api/spotify/playlist/${playlist.id}`)
+            asyncFn: () => fetchWithAuth<SpotifyTrack[]>(`/api/spotify/user/playlists/${playlist.id}`)
         })
     },
     

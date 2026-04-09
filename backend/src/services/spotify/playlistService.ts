@@ -14,7 +14,6 @@ export const getPlaylists = async (req: Request, res: Response) => {
             url: url,
             onSuccess: (data) => {
                 if(!data) return res.status(204).send()
-                console.log(data)
                 const playlists: SpotifyPlaylist[] = data.map((playlist: SpotifyAPIPlaylist) => ({
                         id: playlist.id,
                         uri: playlist.uri,
@@ -60,7 +59,6 @@ export const getPlaylistTracks = async (req: Request, res: Response) => {
             if(!data) {
                 return res.status(204).send()
             }
-            console.log('getting playlist tracks: ',data)
             return res.json(data)
         }
     })

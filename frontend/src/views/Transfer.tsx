@@ -17,7 +17,7 @@ export function Transfer() {
             return <div>No Playlists Yet</div>
         }
         return spotifyPlaylists.map((playlist) => (
-            <div className='flex gap-2 items-center p-2 rounded-lg hover:bg-gray-900/10 dark:hover:bg-white/10' 
+            <div className='flex gap-2 items-center p-2 rounded-lg hover:translate-x-4 hover:bg-gray-900/10 dark:hover:bg-white/10 transition-all duration-300' 
                  key={playlist.id}
                  onClick={() => {
                     fetchPlaylistItems(playlist)
