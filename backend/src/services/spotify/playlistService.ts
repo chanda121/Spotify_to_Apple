@@ -31,17 +31,18 @@ export const getPlaylists = async (req: Request, res: Response) => {
 
 }
 
-export const getSavedSongs = async (req: Request, res: Response) => {
+export const getLikedSongs = async (req: Request, res: Response) => {
     const limit = Number(req.query.limit) || 20
     const offset = Number(req.query.offset) || 0
 
-    await fetchWithAuth<SpotifyAPITrack[]>({
+    await fetchAllPages<SpotifyAPITrack[]>({
         req, res,
         url: `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
             if (!data) {
                 return res.status(204).send()
             }
+            const likedSongsPlaylist = 
             return res.json(data)
         }
     })
