@@ -90,6 +90,11 @@ export interface SpotifyAPITrack {
     album: SpotifyAPIAlbum,
 }
 
+export interface SpotifyAPIPlaylistTrack {
+    added_at: string,
+    item: SpotifyAPITrack
+}
+
 
 export interface SpotifyPlaybackSnapshot {
     isPlaying: boolean,
