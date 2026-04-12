@@ -1,5 +1,5 @@
 import { fetchAllPages } from '../SpotifyAPIClient.js'
-import type { SpotifyAPIPlaylistTrack, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '@shared/types/spotify.js'
+import type { SpotifyAPITrack, SpotifyAPIPlaylistTrack, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '@shared/types/spotify.js'
 import type { Request, Response } from 'express'
 
 export const getPlaylists = async (req: Request, res: Response) => {
@@ -34,8 +34,6 @@ export const getPlaylists = async (req: Request, res: Response) => {
             }
         }
     )
-
-
 }
 
 export const getLikedSongs = async (req: Request, res: Response) => {
@@ -62,14 +60,15 @@ export const getPlaylistTracks = async (req: Request, res: Response) => {
         return await getLikedSongs(req, res)
     }
 
-    await fetchAllPages<SpotifyItemsResponse<SpotifyAPIPlaylistTrack>>({
+    await fetchAllPages<SpotifyAPIPlaylistTrack>({
         req, res,
         url: `https://api.spotify.com/v1/playlists/${id}/items?limit=${limit}&offset=${offset}`,
         onSuccess: (data) => {
             if(!data) {
                 return res.status(204).send()
             }
-            return res.json(data.items)
+            const tracks = data.map(obj => obj.item)
+            return res.json(tracks)
         }
     })
 }

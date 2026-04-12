@@ -128,17 +128,6 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             onSuccess: (data: SpotifyPlaylist[]) => {set({ playlists: data })},
             asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/spotify/user/playlists?limit=${limit}&offset=${offset}`)
         })
-
-        await runAsyncAction({
-            set,
-            loadingKey: 'isLoadingPlaylists',
-            errorKey: 'playlistsError',
-            onSuccess: (data: SpotifyPlaylist[]) => {
-                //set({ playlists: get().playlists.concat(data) })
-                console.log(data)
-            },
-            asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/spotify/user/liked-songs?limit=${limit}&offset=${offset}`)
-        })
     },
 
     fetchPlaylistItems: async (playlist) => {

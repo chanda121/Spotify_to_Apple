@@ -1,4 +1,4 @@
-import { createJWT } from '../../utils/crypto';
+import { createJWT } from '../../utils/crypto.js';
 import type { Request, Response } from 'express';
 
 const keyId = process.env.APPLE_KID
