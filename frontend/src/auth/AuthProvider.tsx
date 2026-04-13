@@ -52,7 +52,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             void fetchPlaylists()
             void initializeMusicKit()
         }
-    }, [status, fetchUser, fetchTopTracks, fetchTopArtists, fetchPlaylists, initializeMusicKit])
+    }, [status, fetchUser, fetchTopTracks, fetchTopArtists, initializeMusicKit])
 
     return <AuthContext.Provider value={ {status, login, logout} }>
         { children }

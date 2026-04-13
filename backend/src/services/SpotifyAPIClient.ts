@@ -10,14 +10,13 @@ export const fetchWithAuth = async <T>({req, res, url, onSuccess}:
         onSuccess: (data: T | null) => ExpressResponse
     }): Promise<ExpressResponse | void> => {
 
-        const spotifyToken = req.session.spotifyToken
-        if (!spotifyToken) {
-            return res.status(401).json({ error: { message: 'No token' } })
-        }
-        const accessToken = spotifyToken.accessToken
+        const accessToken = req.session.spotifyToken?.accessToken
 
         try {
-            const response = await fetchUrl(url, accessToken)
+            const response = await fetch(url, {
+                method: 'GET',
+                headers: { 'Authorization': `Bearer ${accessToken}` }
+            })
             if (response.status === 204) {
                 return onSuccess(null)
             }
