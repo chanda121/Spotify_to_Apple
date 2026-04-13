@@ -15,10 +15,6 @@ router.get('/top-artists', requireSpotifyAuth, getTopArtists)
 
 router.get('/playlists', requireSpotifyAuth, getPlaylists)
 
-
-
-
-
 router.get('/playlists/:id', requireSpotifyAuth, getPlaylistTracks)
 
 router.get('/liked-songs', requireSpotifyAuth, getLikedSongs)
