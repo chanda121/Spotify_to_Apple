@@ -12,7 +12,6 @@ router.get('/get-current-track', requireSpotifyAuth, async (req: Request, res: R
     if (!accessToken) throw createError(401, 'Missing access token')
 
     const data = await getCurrentlyPlaying(accessToken)
-    if (!data) throw createError(502, 'Unexpected empty response from Spotify')
 
     return res.json(data)
 })

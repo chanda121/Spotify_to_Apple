@@ -1,7 +1,7 @@
 import express from 'express'
 import createError from 'http-errors'
 import { getSession, getUserInfo, getTopArtists, getTopTracks } from '../../services/spotify/userService.js'
-import { getPlaylists, getLikedSongs, getPlaylistTracks } from '../../services/spotify/playlistService.js'
+import { getPlaylists, getPlaylistTracks } from '../../services/spotify/playlistService.js'
 import { requireSpotifyAuth } from '../../middleware/requireAuth.js'
 import type { Request, Response } from 'express'
 
