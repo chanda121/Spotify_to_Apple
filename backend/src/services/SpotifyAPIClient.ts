@@ -1,79 +1,31 @@
-
-import type { Request, Response as ExpressResponse } from 'express'
+import createError from 'http-errors'
 import type { SpotifyItemsResponse } from '@shared/types/spotify.js'
 
-export const fetchWithAuth = async <T>({req, res, url, onSuccess}:
-    {
-        req: Request
-        res: ExpressResponse
-        url: string
-        onSuccess: (data: T | null) => ExpressResponse
-    }): Promise<ExpressResponse | void> => {
+export const fetchWithAuth = async <T>(accessToken: string, url: string):Promise<T | null> => {
+    const response = await fetchUrl(url, accessToken)
+    await checkAPIResponse(response) 
 
-        const spotifyToken = req.session.spotifyToken
-        if (!spotifyToken) {
-            return res.status(401).json({ error: { message: 'No token' } })
-        }
-        const accessToken = spotifyToken.accessToken
-
-        try {
-            const response = await fetchUrl(url, accessToken)
-            if (response.status === 204) {
-                return onSuccess(null)
-            }
-
-            if (!await checkAPIResponse(response, res)) return
-
-            const data = await response.json() as T
-            return onSuccess(data)
-        } catch (error) {
-            console.error('fetchWithAuth error:', error)
-            return res.status(500).json({ 
-                error: {
-                    message: 'Internal Server Error'
-                }
-            })
-        }
+    if (response.status === 204) return null
+    return await response.json() as T
 }
 
-export const fetchAllPages = async <T>({req, res, url, onSuccess}:
-    {
-        req: Request
-        res: ExpressResponse
-        url: string
-        onSuccess: (data: T[] | null) => ExpressResponse
-    }): Promise<ExpressResponse | void> => {
-        try {
-            const spotifyToken = req.session.spotifyToken
-            if (!spotifyToken) {
-                return res.status(401).json({ error: { message: 'No token' } })
-            }
-            const accessToken = spotifyToken.accessToken
+export const fetchAllPages = async <T>(accessToken: string, url: string):Promise<T[]> => {
+    let response = await fetchUrl(url, accessToken)
+    await checkAPIResponse(response)
 
-            let response = await fetchUrl(url, accessToken)
-            if(!await checkAPIResponse(response, res)) return
+    if (response.status === 204) return []
+    let responseData = await response.json() as SpotifyItemsResponse<T>
+    let data = responseData.items
 
-            let initData = await response.json() as SpotifyItemsResponse<T>
-            let jsonResponse = initData.items
+    while(responseData.next) {
+        response = await fetchUrl(responseData.next, accessToken)
+        await checkAPIResponse(response)
 
-            while (initData.next) {
-                response = await fetchUrl(initData.next, accessToken)
-                if(!await checkAPIResponse(response, res)) return
+        responseData = await response.json() as SpotifyItemsResponse<T>
+        data = data.concat(responseData.items)
+    }
 
-                initData = await response.json() as SpotifyItemsResponse<T>
-                jsonResponse = jsonResponse.concat(initData.items)
-            }
-
-            return onSuccess(jsonResponse)
-
-        } catch (error) {
-            console.error(`get query error: ${error}`)
-            return res.status(500).json({
-                error: {
-                    message: 'Failed to get query'
-                }
-            })   
-        }
+    return data
 }
 
 const fetchUrl = async (url:string, accessToken:string) => {
@@ -83,23 +35,11 @@ const fetchUrl = async (url:string, accessToken:string) => {
     })
 }
 
-/**
- * 
- * @param fetchRes fetch API response object
- * @param expressRes ExpressResponse object
- * @returns true if response is ok, false if response not ok
- */
-export const checkAPIResponse = async (fetchRes: Response, expressRes: ExpressResponse): Promise<boolean> => {
-    if (!fetchRes.ok) {
-        const text = await fetchRes.text().catch(() => '')
-        console.error('Spotify error:', fetchRes.status, text)
-        expressRes.status(fetchRes.status).json({
-            error: {
-                message: 'Spotify API error...'
-            }
-        })
-        return false
+export const checkAPIResponse = async (res: Response): Promise<void> => {
+    if (!res.ok) {
+        console.error(`Spotify API error: ${await res.text().catch(() => 'could not parse...')}`)
+        const errMessage = 'Spotify fetch error'
+        throw createError(res.status, errMessage)
     }
-    return true
 }
 
