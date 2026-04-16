@@ -17,11 +17,11 @@ export const getSession = async (req: Request, res: Response) => {
     }
 }
 
-export const getUserInfo = async (accessToken: string) => {
+export const getUserInfo = async (accessToken: string): Promise<SpotifyUser | null> => {
     const userInfoPayload = await fetchWithAuth<SpotifyApiUser>(accessToken, 'https://api.spotify.com/v1/me')
     if (!userInfoPayload) return null
 
-    const user: SpotifyUser = {
+    const user = {
         id: userInfoPayload.id,
         email: userInfoPayload.email,
         displayName: userInfoPayload.display_name,
@@ -40,7 +40,7 @@ export const getTopTracks = async (
         limit = 20, 
         offset = 0
     }:Partial<topQueryParams> = {}
-    ) => {
+    ): Promise<Spotify | null> => {
 
     const url = `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=${limit}&offset=${offset}`
     const tracksPayload = await fetchWithAuth<SpotifyItemsResponse<SpotifyAPITrack>>(accessToken, url)
@@ -49,21 +49,20 @@ export const getTopTracks = async (
 
     const topTracks = tracksPayload.items.map((track: SpotifyAPITrack) => ({
         id: track.id,
-        uri: track.uri,
         name: track.name,
         durationMs: track.duration_ms,
         artists: track.artists.map((artist: SpotifyArtist) => ({
             id: artist.id,
-            uri: artist.uri,
             name: artist.name,
         })),
         album: {
             id: track.album.id,
-            uri: track.album.uri,
             name: track.album.name,
             release_date: track.album.release_date,
-            total_tracks: track.album.total_tracks
-        }
+            total_tracks: track.album.total_tracks,
+            images: track.album.images
+        },
+        isrc: track.external_ids.isrc
     }))
             
     return topTracks   
@@ -85,13 +84,13 @@ export const getTopArtists = async (
 
     const topArtists = artistsPayload.items.map((artist) => ({
         id: artist.id,
-        uri: artist.uri,
         name: artist.name,
-        images: artist.images?.map((image) => ({
-            url: image.url,
-            height: image.height,
-            width: image.width
-        }))
+        // images: artist.images?.map((image) => ({
+        //     url: image.url,
+        //     height: image.height,
+        //     width: image.width
+        // }))
+        images: artist.images
     }))
     return topArtists
 }
