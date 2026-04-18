@@ -40,7 +40,6 @@ export const getPlaylists = async (
     }, ...playlists]
 
     return playlists
-            
 }
 
 export const getLikedSongs = async (

@@ -137,7 +137,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             loadingKey: 'isLoadingPlaylist',
             errorKey: 'playlistError',
             onSuccess: (data: SpotifyTrack[]) => {
-                console.log('track data: ', data)
+                return data                                                
             },
             asyncFn: () => fetchWithAuth<SpotifyTrack[]>(`/api/spotify/user/playlists/${playlist.id}`)
         })

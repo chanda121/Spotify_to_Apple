@@ -87,7 +87,8 @@ export interface SpotifyPlaylist {
     name: string,
     ownerId: string,
     ownerName: string,
-    images?: Image[]
+    images?: Image[],
+    tracks?: SpotifyTrack[]
 }
 export interface SpotifyArtist {
     id: string,
@@ -129,6 +130,19 @@ export interface SpotifyAPIPlaybackSnapshot {
     progress_ms: number,
     currently_playing_type: string,
     item: SpotifyAPITrack | null
+}
+//--------------------------------------------------- SPOTIFY TRANSFER INTERFACES --------------------------------------//
+export interface TransferTrack {
+    trackName: string,
+    artistNames: string[],
+    isrc?: string,
+    durationMs?: number
+    albumName?: string,   
+}
+
+export interface TransferPlaylist {
+    playlistName: string,
+    playlistTracks: transferTrack[]
 }
 
 //--------------------------------------------------- SPOTIFY TOKEN INTERFACES -----------------------------------------//
