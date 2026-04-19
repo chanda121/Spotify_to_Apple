@@ -62,9 +62,6 @@ export function Transfer() {
                 <div id='spotify-playlist-col' className='flex flex-col gap-2 grow p-2'>
                     {displayPlaylists()}
                 </div>
-                <div id='apple-playlist-col' className='flex flex-col gap-1 grow'>
-                    <div>placeholder</div>
-                </div>
             </div>
         </div>
 

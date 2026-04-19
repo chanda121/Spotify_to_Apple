@@ -21,21 +21,21 @@ interface SpotifyUserState {
     isLoadingTopTracks: boolean,
     isLoadingTopArtists: boolean,
     isLoadingPlaylists: boolean,
-    isLoadingPlaylist: boolean,
+    isLoadingPlaylistTracks: boolean,
 
     // Error states
     userError: string | null,
     topTracksError: string | null,
     topArtistsError: string | null,
     playlistsError: string | null,
-    playlistError: string | null,
+    playlistTracksError: string | null,
 }
 interface SpotifyUserAction {
     fetchUser: () => Promise<void>,
     fetchTopTracks: () => Promise<void>,
     fetchTopArtists: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
-    fetchPlaylistItems: (playlist: SpotifyPlaylist) => Promise<void>,
+    fetchPlaylistItems: (playlist: SpotifyPlaylist) => Promise<SpotifyTrack[]>,
     clearErrors: () => void,
     reset: () => void
 }
@@ -47,17 +47,19 @@ const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn}
         set: SetState
         loadingKey: string
         errorKey: string
-        onSuccess: (data: T) => void
+        onSuccess: (data: T) => void | T
         asyncFn: () => Promise<T>
-    }) => {
+    }): Promise<T | undefined> => {
         set({ [loadingKey]: true, [errorKey]: null })
         try {
             const data = await asyncFn()
             onSuccess(data)
+            return data
         } catch (error) {
             const msg = error instanceof Error ? error.message : 'Unexpected Error'
             set({ [errorKey]: msg })
             console.error(error)
+            return undefined
         } finally {
             set({ [loadingKey]: false })
         }
@@ -74,14 +76,14 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     isLoadingTopTracks: false,
     isLoadingTopArtists: false,
     isLoadingPlaylists: false,
-    isLoadingPlaylist: false,
+    isLoadingPlaylistTracks: false,
 
     // Error states
     userError: null,
     topTracksError: null,
     topArtistsError: null,
     playlistsError: null,
-    playlistError: null,
+    playlistTracksError: null,
 
     fetchUser: async () => {
         await runAsyncAction({
@@ -129,18 +131,22 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/spotify/user/playlists?limit=${limit}&offset=${offset}`)
         })
     },
-
+    //look at the case where there is a fetch error and it returns an empty playlist, see if plausible etc
     fetchPlaylistItems: async (playlist) => {
-        console.log('playlist: ', playlist)
-        await runAsyncAction({
+        const currPlaylist = get().playlists.find(p => p.id === playlist.id) ?? playlist
+        if (currPlaylist.tracks !== undefined) {
+            return currPlaylist.tracks
+        }
+        return await runAsyncAction({
             set,
-            loadingKey: 'isLoadingPlaylist',
-            errorKey: 'playlistError',
+            loadingKey: 'isLoadingPlaylistTracks',
+            errorKey: 'playlistTracksError',
             onSuccess: (data: SpotifyTrack[]) => {
+                set(state => ({playlists: state.playlists.map(p => p.id === playlist.id ? {...p, tracks: data} : p)}))
                 return data                                                
             },
             asyncFn: () => fetchWithAuth<SpotifyTrack[]>(`/api/spotify/user/playlists/${playlist.id}`)
-        })
+        }) as SpotifyTrack[]
     },
     
     clearErrors: () => {
@@ -148,7 +154,8 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             userError: null,
             topTracksError: null,
             topArtistsError: null,
-            playlistsError: null
+            playlistsError: null,
+            playlistTracksError: null,
         })
     },
 
@@ -162,10 +169,12 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             isLoadingTopTracks: false,
             isLoadingTopArtists: false,
             isLoadingPlaylists: false,
+            isLoadingPlaylistTracks: false,
             userError: null,
             topTracksError: null,
             topArtistsError: null,
-            playlistsError: null
+            playlistsError: null,
+            playlistTracksError: null,
         })
     }
 }))
