@@ -47,7 +47,11 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
     },
 
     togglePlaylist: async (playlist: SpotifyPlaylist) => {
-
+        if (get().isPlaylistInTransfer(playlist.id)) {
+            await get().removePlaylist(playlist)
+        } else {
+            await get().addPlaylist(playlist)
+        }
     },
 
     isPlaylistInTransfer: (playlistId) => {
