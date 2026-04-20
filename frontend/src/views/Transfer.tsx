@@ -9,8 +9,7 @@ export function Transfer() {
     const fetchApplePlaylists = useAppleStore(state => state.fetchPlaylists)
 
     const spotifyPlaylists = useSpotifyUserStore(state => state.playlists)
-    const fetchSpotifyPlaylists = useSpotifyUserStore(state => state.fetchPlaylists)
-    const fetchPlaylistItems = useSpotifyUserStore(state =>  state.fetchPlaylistItems)
+    const fetchPlaylistItems = useSpotifyUserStore(state => state.fetchPlaylistItems)
 
     const displayPlaylists = () => {
         if (!spotifyPlaylists.length) {
@@ -20,7 +19,7 @@ export function Transfer() {
             <div className='flex gap-2 items-center p-2 rounded-lg hover:translate-x-4 hover:bg-gray-900/10 dark:hover:bg-white/10 transition-all duration-300' 
                  key={playlist.id}
                  onClick={() => {
-                    fetchPlaylistItems(playlist)
+                    console.log(fetchPlaylistItems(playlist))
                  }}
                 >
                 {
@@ -54,9 +53,6 @@ export function Transfer() {
             <button onClick={async () => {
                 await fetchApplePlaylists()
             }}>Get A playlists</button>
-            <button onClick={async () => {
-                await fetchSpotifyPlaylists()
-            }}>Get S playlists</button>
 
             <div className='flex gap-1'>
                 <div id='spotify-playlist-col' className='flex flex-col gap-2 grow p-2'>
