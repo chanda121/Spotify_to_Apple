@@ -42,6 +42,8 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
     playlistError: null,
 
     initializeMusicKit: async () => {
+        if (get().musicKitConfigured || get().isLoadingMusicKit) return
+
         set({ isLoadingMusicKit: true, musicKitError: null })
         try {
             await new Promise<void>((resolve, reject) => {

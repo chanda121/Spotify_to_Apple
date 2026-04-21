@@ -40,16 +40,20 @@ interface SpotifyUserAction {
     reset: () => void
 }
 type SetState = StoreApi<SpotifyUserState & SpotifyUserAction>['setState']
+type GetState = StoreApi<SpotifyUserState & SpotifyUserAction>['getState']
 
-
-const runAsyncAction = async <T>({set, loadingKey, errorKey, onSuccess, asyncFn}: 
+const runAsyncAction = async <T>({set, get, loadingKey, errorKey, onSuccess, asyncFn}: 
     {
+        get: GetState
         set: SetState
-        loadingKey: string
-        errorKey: string
+        loadingKey: keyof SpotifyUserState
+        errorKey: keyof SpotifyUserState
         onSuccess: (data: T) => void | T
         asyncFn: () => Promise<T>
     }): Promise<T | undefined> => {
+        const state = get()
+        if (state[loadingKey]) return undefined
+
         set({ [loadingKey]: true, [errorKey]: null })
         try {
             const data = await asyncFn()
@@ -87,7 +91,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
 
     fetchUser: async () => {
         await runAsyncAction({
-            set,
+            set, get,
             loadingKey: 'isLoadingUser',
             errorKey: 'userError',
             onSuccess: (data: SpotifyUser) => {
@@ -99,7 +103,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
 
     fetchTopTracks: async () => {
         await runAsyncAction({
-            set,
+            set, get,
             loadingKey: 'isLoadingTopTracks',
             errorKey: 'topTracksError',
             onSuccess: (data: SpotifyTrack[]) => {
@@ -111,7 +115,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
 
     fetchTopArtists: async () => {
         await runAsyncAction({
-            set,
+            set, get,
             loadingKey: 'isLoadingTopArtists',
             errorKey: 'topArtistsError',
             onSuccess: (data: SpotifyArtist[]) => {set({ topArtists: data })},
@@ -124,7 +128,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
         const offset = 0
 
         await runAsyncAction({
-            set,
+            set, get,
             loadingKey: 'isLoadingPlaylists',
             errorKey: 'playlistsError',
             onSuccess: (data: SpotifyPlaylist[]) => {set({ playlists: data })},
@@ -138,7 +142,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             return currPlaylist.tracks
         }
         return await runAsyncAction({
-            set,
+            set, get,
             loadingKey: 'isLoadingPlaylistTracks',
             errorKey: 'playlistTracksError',
             onSuccess: (data: SpotifyTrack[]) => {
