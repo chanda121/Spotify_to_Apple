@@ -1,4 +1,5 @@
 import { generateRandomString, generateCodeChallenge } from '../../utils/crypto.js'
+import { Mutex } from 'async-mutex'
 import type { Request, Response } from 'express'
 import type { SpotifyAPIToken, SpotifyTokenError } from '@shared/types/spotify.js'
 
