@@ -1,7 +1,6 @@
 import { fetchAllPages } from '../SpotifyAPIClient.js'
 import type { 
     SpotifyTrack, 
-    SpotifyAPITrack, 
     SpotifyAPIPlaylistTrack, 
     SpotifyAPILikedSongsObject, 
     SpotifyAPIPlaylist, 
@@ -20,6 +19,8 @@ export const getPlaylists = async (
         offset = 0
     }:Partial<playlistParams> = {}
     ): Promise<SpotifyPlaylist[]> => {
+    
+    console.log('in getPlaylist')
 
     const url = `https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`
     const playlistsPayload = await fetchAllPages<SpotifyAPIPlaylist>(accessToken, url)
@@ -49,6 +50,7 @@ export const getLikedSongs = async (
         offset = 0
     }:Partial<playlistParams> = {}
     ): Promise<SpotifyTrack[]> => {
+
     const url = `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`
     let likedSongsPayload = await fetchAllPages<SpotifyAPILikedSongsObject>(accessToken, url)
     const tracksPayload = likedSongsPayload.map(track => track.track)
@@ -88,7 +90,12 @@ export const getPlaylistTracks = async (
     }
     const url = `https://api.spotify.com/v1/playlists/${id}/items?limit=${limit}&offset=${offset}`
     const playlistTracksPayload = await fetchAllPages<SpotifyAPIPlaylistTrack>(accessToken, url)
-    const tracksPayload = playlistTracksPayload.map(track => track.item)
+    const tracksPayload = playlistTracksPayload
+                            .map(wrapper => wrapper.item)
+                            .filter(item => item !== null && item.type === 'track')
+
+    console.log(tracksPayload.slice(0,10))
+    console.log(tracksPayload.length)
 
     const tracks = tracksPayload.map(track => ({
         id: track.id,

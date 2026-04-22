@@ -60,6 +60,7 @@ export interface SpotifyAPITrack {
     duration_ms: number,
     artists: SpotifyAPIArtist[],
     album: SpotifyAPIAlbum,
+    type?: string,
     external_ids: {
         isrc: string
     }

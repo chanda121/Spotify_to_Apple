@@ -1,6 +1,6 @@
 import { fetchWithAuth } from '../SpotifyAPIClient.js'
 import { checkAccessToken } from './authService.js'
-import type { SpotifyApiUser, SpotifyUser, SpotifyAPITrack, SpotifyArtist, SpotifyItemsResponse } from '@shared/types/spotify.js'
+import type { SpotifyApiUser, SpotifyUser, SpotifyAPITrack, SpotifyArtist, SpotifyItemsResponse, SpotifyTrack } from '@shared/types/spotify.js'
 import type { Request, Response } from 'express'
 
 type topQueryParams = {
@@ -18,6 +18,8 @@ export const getSession = async (req: Request, res: Response) => {
 }
 
 export const getUserInfo = async (accessToken: string): Promise<SpotifyUser | null> => {
+    console.log('in getUsers')
+
     const userInfoPayload = await fetchWithAuth<SpotifyApiUser>(accessToken, 'https://api.spotify.com/v1/me')
     if (!userInfoPayload) return null
 
@@ -40,7 +42,8 @@ export const getTopTracks = async (
         limit = 20, 
         offset = 0
     }:Partial<topQueryParams> = {}
-    ): Promise<Spotify | null> => {
+    ): Promise<SpotifyTrack[] | null> => {
+    console.log('in getTracks')
 
     const url = `https://api.spotify.com/v1/me/top/tracks?time_range=${timeRange}&limit=${limit}&offset=${offset}`
     const tracksPayload = await fetchWithAuth<SpotifyItemsResponse<SpotifyAPITrack>>(accessToken, url)
@@ -58,8 +61,8 @@ export const getTopTracks = async (
         album: {
             id: track.album.id,
             name: track.album.name,
-            release_date: track.album.release_date,
-            total_tracks: track.album.total_tracks,
+            releaseDate: track.album.release_date,
+            totalTracks: track.album.total_tracks,
             images: track.album.images
         },
         isrc: track.external_ids.isrc
@@ -85,11 +88,6 @@ export const getTopArtists = async (
     const topArtists = artistsPayload.items.map((artist) => ({
         id: artist.id,
         name: artist.name,
-        // images: artist.images?.map((image) => ({
-        //     url: image.url,
-        //     height: image.height,
-        //     width: image.width
-        // }))
         images: artist.images
     }))
     return topArtists

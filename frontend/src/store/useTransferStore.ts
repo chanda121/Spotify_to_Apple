@@ -11,12 +11,14 @@ interface TransferAction {
     removePlaylist: (playlist: SpotifyPlaylist) => void,
     togglePlaylist: (playlist: SpotifyPlaylist) => Promise<void>,
     isPlaylistInTransfer: (playlistId: string) => boolean,
+    clearAll: () => void,
 }
 
 export const useTransferStore = create<TransferState & TransferAction>((set, get) => ({
     playlistsToTransfer: [],
 
     addPlaylist: async (playlist: SpotifyPlaylist) => {
+        if (get().isPlaylistInTransfer(playlist.id)) return
         const tracks = await useSpotifyUserStore.getState().fetchPlaylistItems(playlist)
 
         const transferTracks: TransferTrack[] = tracks.map(track => ({
@@ -33,14 +35,14 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
             tracks: transferTracks,
         }
 
-        set(state => ({playlistsToTransfer: {...state.playlistsToTransfer, playlistToAdd}}))
+        set(state => ({playlistsToTransfer: [...state.playlistsToTransfer, playlistToAdd]}))
     },
 
     addMultiplePlaylists: async (playlists: SpotifyPlaylist[]) => {
         playlists.forEach(playlist => { get().addPlaylist(playlist) })
     },
 
-    removePlaylist: async (playlist: SpotifyPlaylist) => {
+    removePlaylist: (playlist: SpotifyPlaylist) => {
         const newPlaylists = get().playlistsToTransfer.filter(p => p.id !== playlist.id)
 
         set({ playlistsToTransfer: newPlaylists })
@@ -59,6 +61,10 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
             if (playlist.id === playlistId) return true
         }
         return false
+    },
+
+    clearAll: () => {
+        set({ playlistsToTransfer: [] })
     }
 
 }))

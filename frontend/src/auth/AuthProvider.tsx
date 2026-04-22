@@ -33,7 +33,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
                 const data = await response.json()
 
-                if (data.loggedIn) setStatus(prev => data.loggedIn ? prev : 'loggedIn')
+                if (data.loggedIn) setStatus(prev => prev === 'loggedIn' ? prev : 'loggedIn')
                 else {
                     setStatus('loggedOut')
                     resetStore()
