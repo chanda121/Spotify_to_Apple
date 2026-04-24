@@ -166,7 +166,6 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             topTracksError: null,
             topArtistsError: null,
             playlistsError: null,
-            playlistTracksError: null,
         })
     },
 
@@ -181,12 +180,10 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             isLoadingTopTracks: false,
             isLoadingTopArtists: false,
             isLoadingPlaylists: false,
-            isLoadingPlaylistTracks: false,
             userError: null,
             topTracksError: null,
             topArtistsError: null,
             playlistsError: null,
-            playlistTracksError: null,
         })
     }
 }))
