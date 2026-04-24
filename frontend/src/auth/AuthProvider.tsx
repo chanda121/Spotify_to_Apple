@@ -27,13 +27,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     //set status here
     useEffect( () => {
         const checkSession = async () => {
-            const response = await fetch('/api/spotify/user/session')
-            const data = await response.json()
-            if (data.loggedIn) {
-                setStatus('loggedIn')
-            } else {
-                resetStore() // Clear stale data when session expires
+            try {
+                const response = await fetch('/api/spotify/user/session')
+                if (!response.ok) throw new Error(`response failed with status: ${response.status}`)
+
+                const data = await response.json()
+
+                if (data.loggedIn) setStatus(prev => prev === 'loggedIn' ? prev : 'loggedIn')
+                else {
+                    setStatus('loggedOut')
+                    resetStore()
+                }
+
+            } catch (error) {
+                resetStore()
                 setStatus('loggedOut')
+                console.warn('session check failed', error)
             }
         }
         checkSession()

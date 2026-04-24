@@ -1,5 +1,10 @@
 import { fetchAllPages } from '../SpotifyAPIClient.js'
-import type { SpotifyAPITrack, SpotifyAPIPlaylistTrack, SpotifyAPIPlaylist, SpotifyItemsResponse, SpotifyPlaylist } from '@shared/types/spotify.js'
+import type { 
+    SpotifyTrack, 
+    SpotifyAPIPlaylistTrack, 
+    SpotifyAPILikedSongsObject, 
+    SpotifyAPIPlaylist, 
+    SpotifyPlaylist } from '@shared/types/spotify.js'
 
 type playlistParams = {
     id?: string,
@@ -13,14 +18,15 @@ export const getPlaylists = async (
         limit = 50, 
         offset = 0
     }:Partial<playlistParams> = {}
-    ) => {
+    ): Promise<SpotifyPlaylist[]> => {
+    
+    console.log('in getPlaylist')
 
     const url = `https://api.spotify.com/v1/me/playlists?limit=${limit}&offset=${offset}`
     const playlistsPayload = await fetchAllPages<SpotifyAPIPlaylist>(accessToken, url)
 
     let playlists: SpotifyPlaylist[] = playlistsPayload.map((playlist: SpotifyAPIPlaylist) => ({
             id: playlist.id,
-            uri: playlist.uri,
             name: playlist.name,
             ownerId: playlist.owner.id,
             ownerName: playlist.owner.display_name,
@@ -29,15 +35,12 @@ export const getPlaylists = async (
 
     playlists = [{
         id: 'LIKED_SONGS',
-        uri: 'test',
         name: 'Liked Songs',
         ownerId: 'test',
         ownerName: 'test',
     }, ...playlists]
 
     return playlists
-            
-        
 }
 
 export const getLikedSongs = async (
@@ -46,11 +49,31 @@ export const getLikedSongs = async (
         limit = 50, 
         offset = 0
     }:Partial<playlistParams> = {}
-    ) => {
-    const url = `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`
-    const likedSongsPayload = await fetchAllPages<SpotifyAPITrack>(accessToken, url)
+    ): Promise<SpotifyTrack[]> => {
 
-    return likedSongsPayload
+    const url = `https://api.spotify.com/v1/me/tracks?limit=${limit}&offset=${offset}`
+    let likedSongsPayload = await fetchAllPages<SpotifyAPILikedSongsObject>(accessToken, url)
+    const tracksPayload = likedSongsPayload.map(track => track.track)
+
+    const likedSongs: SpotifyTrack[] = tracksPayload.map(track => ({
+        id: track.id,
+        name: track.name,
+        durationMs: track.duration_ms,
+        artists: track.artists.map(artist => ({
+            id: artist.id,
+            name: artist.name,
+        })),
+        album: {
+            id: track.album.id,
+            name: track.album.name,
+            releaseDate: track.album.release_date,
+            totalTracks: track.album.total_tracks,
+            images: track.album.images,
+        },
+        isrc: track.external_ids.isrc   
+    }))
+
+    return likedSongs
 }
 
 export const getPlaylistTracks = async (
@@ -60,16 +83,37 @@ export const getPlaylistTracks = async (
         limit = 50, 
         offset = 0
     }:Partial<playlistParams> = {}
-    ) => {
+    ): Promise<SpotifyTrack[]> => {
 
     if (id === 'LIKED_SONGS') {
         return await getLikedSongs(accessToken)
     }
     const url = `https://api.spotify.com/v1/playlists/${id}/items?limit=${limit}&offset=${offset}`
     const playlistTracksPayload = await fetchAllPages<SpotifyAPIPlaylistTrack>(accessToken, url)
+    const tracksPayload = playlistTracksPayload
+                            .map(wrapper => wrapper.item)
+                            .filter(item => item !== null && item.type === 'track')
 
-    const tracks = playlistTracksPayload.map(obj => obj.item)
+    console.log(tracksPayload.slice(0,10))
+    console.log(tracksPayload.length)
 
+    const tracks = tracksPayload.map(track => ({
+        id: track.id,
+        name: track.name,
+        durationMs: track.duration_ms,
+        artists: track.artists.map(artist => ({
+            id: artist.id,
+            name: artist.name,
+        })),
+        album: {
+            id: track.album.id,
+            name: track.album.name,
+            releaseDate: track.album.release_date,
+            totalTracks: track.album.total_tracks,
+            images: track.album.images,
+        },
+        isrc: track.external_ids.isrc   
+    }))
 
     return tracks
 }

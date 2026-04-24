@@ -1,13 +1,25 @@
 import { generateRandomString, generateCodeChallenge } from '../../utils/crypto.js'
+import { Mutex } from 'async-mutex'
 import type { Request, Response } from 'express'
 import type { SpotifyAPIToken, SpotifyTokenError } from '@shared/types/spotify.js'
 
 const BUFFER = 60000 //60 second buffer
 
+const authMutexMap: Map<string, Mutex> = new Map()
+
+const getMutex = (sessionId: string): Mutex => {
+    let mutex = authMutexMap.get(sessionId)
+    if(!mutex) {
+        mutex = new Mutex()
+        authMutexMap.set(sessionId, mutex)
+    }
+    return mutex 
+}
+
 const clientId = process.env.SPOTIFY_CLIENT_ID
 const redirectAuthUri = process.env.SPOTIFY_REDIRECT_URI
 
-export const refreshToken = async (req: Request): Promise<boolean> => {
+const refreshToken = async (req: Request): Promise<boolean> => {
     const refreshTokenVal = req.session.spotifyToken ? req.session.spotifyToken.refreshToken : null
 
     try {
@@ -62,13 +74,13 @@ export const refreshToken = async (req: Request): Promise<boolean> => {
  */
 export const checkAccessToken = async (req: Request): Promise<boolean> => {
     if (!req.session.spotifyToken) return false
-
-    if (Date.now() > req.session.spotifyToken.expiresDatetime - BUFFER) {
-        const success = await refreshToken(req)
-
-        return success
-    }
-    return true
+    if (Date.now() <= req.session.spotifyToken.expiresDatetime - BUFFER) return true
+    
+    const mutex = getMutex(req.sessionID)
+    return mutex.runExclusive( async () => {
+        if (Date.now() <= req.session.spotifyToken!.expiresDatetime - BUFFER) return true
+        return refreshToken(req)
+    })
 }
 
 export const getToken = (req: Request, res: Response) => {
@@ -160,5 +172,6 @@ export const logout = (req: Request, res: Response) => {
     delete req.session.generatedState
     delete req.session.codeVerifier
 
+    authMutexMap.delete(req.sessionID)
     return res.redirect(process.env.FRONTEND_URL ?? 'http://127.0.0.1:5173/')
 }
