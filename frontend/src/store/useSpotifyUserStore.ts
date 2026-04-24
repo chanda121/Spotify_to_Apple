@@ -23,14 +23,12 @@ interface SpotifyUserState {
     isLoadingTopTracks: boolean,
     isLoadingTopArtists: boolean,
     isLoadingPlaylists: boolean,
-    isLoadingPlaylistTracks: boolean,
 
     // Error states
     userError: string | null,
     topTracksError: string | null,
     topArtistsError: string | null,
     playlistsError: string | null,
-    playlistTracksError: string | null,
 }
 interface SpotifyUserAction {
     fetchUser: () => Promise<void>,
@@ -137,7 +135,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
             asyncFn: () => fetchWithAuth<SpotifyPlaylist[]>(`/api/spotify/user/playlists?limit=${limit}&offset=${offset}`)
         })
     },
-    //look at the case where there is a fetch error and it returns an empty playlist, see if plausible etc
+
     fetchPlaylistItems: async (playlist) => {
         const currPlaylist = get().playlists.find(p => p.id === playlist.id) ?? playlist
         if (currPlaylist.tracks !== undefined) return currPlaylist.tracks
@@ -151,8 +149,6 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
                             return data
                         })
                         .catch(err => {
-                            const msg = err instanceof Error ? err.message : 'Unexpected Error'
-                            set({ playlistTracksError: msg })
                             console.error(err)
                             return undefined
                         })
