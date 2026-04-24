@@ -60,7 +60,7 @@ export function Stats() {
                         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                             {
                                 topTracks.map((track, index) => (
-                                    <div key={track.id} className='flex items-center gap-4 p-3 rounded-lg hover:bg-gray-900/10 dark:hover:bg-white/10 transition-colors'>
+                                    <div key={track.id} className='flex items-center gap-4 p-3 rounded-lg row-hover'>
                                         <span className='w-8 text-2xl font-bold text-black/30 dark:text-white/30'>{index + 1}</span>
                                         <div>
                                             <div className='font-semibold'>{track.name}</div>
@@ -87,7 +87,7 @@ export function Stats() {
                         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                             {
                                 topArtists.map((artist, index) => (
-                                    <div key={artist.id} className='flex items-center gap-4 rounded-xl p-4 hover:bg-gray-900/10 dark:hover:bg-white/10 transition-colors'>
+                                    <div key={artist.id} className='flex items-center gap-4 rounded-xl p-4 row-hover'>
 
                                         {
                                             artist.images?.length && artist.images[2] &&

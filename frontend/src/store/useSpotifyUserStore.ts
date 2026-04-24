@@ -9,6 +9,8 @@ import type {
 
 import { fetchWithAuth } from '../utils/api'
 
+const inFlightPlaylistItems = new Map<string, Promise<SpotifyTrack[] | undefined>>()
+
 interface SpotifyUserState {
     // Data
     user: SpotifyUser | null,
@@ -35,7 +37,7 @@ interface SpotifyUserAction {
     fetchTopTracks: () => Promise<void>,
     fetchTopArtists: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
-    fetchPlaylistItems: (playlist: SpotifyPlaylist) => Promise<SpotifyTrack[]>,
+    fetchPlaylistItems: (playlist: SpotifyPlaylist) => Promise<SpotifyTrack[] | undefined>,
     clearErrors: () => void,
     reset: () => void
 }
@@ -138,19 +140,28 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     //look at the case where there is a fetch error and it returns an empty playlist, see if plausible etc
     fetchPlaylistItems: async (playlist) => {
         const currPlaylist = get().playlists.find(p => p.id === playlist.id) ?? playlist
-        if (currPlaylist.tracks !== undefined) {
-            return currPlaylist.tracks
-        }
-        return await runAsyncAction({
-            set, get,
-            loadingKey: 'isLoadingPlaylistTracks',
-            errorKey: 'playlistTracksError',
-            onSuccess: (data: SpotifyTrack[]) => {
-                set(state => ({playlists: state.playlists.map(p => p.id === playlist.id ? {...p, tracks: data} : p)}))
-                return data                                                
-            },
-            asyncFn: () => fetchWithAuth<SpotifyTrack[]>(`/api/spotify/user/playlists/${playlist.id}`)
-        }) as SpotifyTrack[]
+        if (currPlaylist.tracks !== undefined) return currPlaylist.tracks
+
+        const existingPromise = inFlightPlaylistItems.get(playlist.id)
+        if (existingPromise) return existingPromise
+
+        const promise = fetchWithAuth<SpotifyTrack[]>(`/api/spotify/user/playlists/${playlist.id}`)
+                        .then(data => {
+                            set(state => ({ playlists: state.playlists.map(p => p.id === playlist.id ? {...p, tracks: data} : p) }))
+                            return data
+                        })
+                        .catch(err => {
+                            const msg = err instanceof Error ? err.message : 'Unexpected Error'
+                            set({ playlistTracksError: msg })
+                            console.error(err)
+                            return undefined
+                        })
+                        .finally(() => {
+                            inFlightPlaylistItems.delete(playlist.id)
+                        })
+        
+        inFlightPlaylistItems.set(playlist.id, promise)
+        return promise
     },
     
     clearErrors: () => {
@@ -164,6 +175,7 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     },
 
     reset: () => {
+        inFlightPlaylistItems.clear()
         set({
             user: null,
             topTracks: [],

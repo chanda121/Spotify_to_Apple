@@ -5,7 +5,7 @@
 :root {
   /* Theme colors */
   --color-bg: pink;
-  --color-bg-secondary: #e442d6a1;
+  --color-bg-secondary: #e658daa1;
   --color-text: #0a001b;
   --color-text-muted: #6b7280;
   --color-accent: #6d0970;
@@ -126,4 +126,18 @@ button:focus-visible {
   right: 0; /*right alignment*/
   top: 100%;
   z-index: 10;
+}
+
+.row-hover {
+  background-color: var(--color-bg);
+  transition-property: background-color, translate;
+  transition-duration: 200ms, 300ms;
+  transition-timing-function: ease-in-out, ease-out;
+}
+.row-hover:hover {
+  background-color: var(--color-bg-secondary);
+}
+
+.selectable-row {
+  background-color: var(--color-bg-secondary);
 }

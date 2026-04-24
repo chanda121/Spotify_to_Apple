@@ -3,6 +3,8 @@ import { useAppleStore } from '../store/useAppleStore'
 import { useSpotifyUserStore } from '../store/useSpotifyUserStore'
 import { useTransferStore } from '../store/useTransferStore'
 import MusicalNoteIcon from '../assets/musical-note.svg'
+import type { SpotifyPlaylist } from '@shared/types/spotify'
+
 
 export function Transfer() {
     const PLAYLIST_IMG_SIZE = 60
@@ -11,26 +13,31 @@ export function Transfer() {
     const fetchApplePlaylists = useAppleStore(state => state.fetchPlaylists)
 
     const spotifyPlaylists = useSpotifyUserStore(state => state.playlists)
-    const fetchPlaylistItems = useSpotifyUserStore(state => state.fetchPlaylistItems)
 
     const togglePlaylist = useTransferStore(state => state.togglePlaylist)
     const playlistsToTransfer = useTransferStore(state => state.playlistsToTransfer)
 
-
     useEffect(() => {
         console.log(playlistsToTransfer)
     }, [playlistsToTransfer])
+
+    const handleSelect = async (playlist: SpotifyPlaylist) => {
+        const element = document.getElementById(playlist.id)
+        element?.classList.toggle('selectable-row')
+
+        await togglePlaylist(playlist)
+    }
 
     const displayPlaylists = () => {
         if (!spotifyPlaylists.length) {
             return <div>No Playlists Yet</div>
         }
         return spotifyPlaylists.map((playlist) => (
-            <div className='flex gap-2 items-center p-2 rounded-lg hover:translate-x-4 hover:bg-gray-900/10 dark:hover:bg-white/10 transition-all duration-300' 
+            <div className='flex gap-2 items-center p-2 rounded-lg hover:translate-x-4 row-hover hover:cursor-pointer' 
                  key={playlist.id}
+                 id={playlist.id}
                  onClick={async () => {
-                    console.log(await fetchPlaylistItems(playlist))
-                    togglePlaylist(playlist)
+                    await handleSelect(playlist)
                  }}
                 >
                 {

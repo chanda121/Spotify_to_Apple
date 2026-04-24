@@ -20,6 +20,9 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
     addPlaylist: async (playlist: SpotifyPlaylist) => {
         if (get().isPlaylistInTransfer(playlist.id)) return
         const tracks = await useSpotifyUserStore.getState().fetchPlaylistItems(playlist)
+        if (get().isPlaylistInTransfer(playlist.id)) return   // post-await recheck
+
+        if (!tracks) return
 
         const transferTracks: TransferTrack[] = tracks.map(track => ({
             trackName: track.name,
@@ -39,7 +42,7 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
     },
 
     addMultiplePlaylists: async (playlists: SpotifyPlaylist[]) => {
-        playlists.forEach(playlist => { get().addPlaylist(playlist) })
+        await Promise.all(playlists.map(p => get().addPlaylist(p)))
     },
 
     removePlaylist: (playlist: SpotifyPlaylist) => {
