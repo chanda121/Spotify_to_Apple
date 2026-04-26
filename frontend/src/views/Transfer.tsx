@@ -17,6 +17,8 @@ export function Transfer() {
     const togglePlaylist = useTransferStore(state => state.togglePlaylist)
     const playlistsToTransfer = useTransferStore(state => state.playlistsToTransfer)
 
+    const test = useTransferStore(state => state.test)
+
     useEffect(() => {
         console.log(playlistsToTransfer)
     }, [playlistsToTransfer])
@@ -71,6 +73,9 @@ export function Transfer() {
             <button onClick={async () => {
                 await fetchApplePlaylists()
             }}>Get A playlists</button>
+            <button onClick={async () => {
+                await test()
+            }}>TEST</button>
 
             <div className='flex gap-1'>
                 <div id='spotify-playlist-col' className='flex flex-col gap-2 grow p-2'>

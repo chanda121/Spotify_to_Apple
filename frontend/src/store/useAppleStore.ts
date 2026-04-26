@@ -12,7 +12,6 @@ interface AppleState {
     playlists: ApplePlaylist[],
     isLoadingPlaylists: boolean,
     playlistError: string | null
-
 }
 interface AppleAction {
     initializeMusicKit: () => Promise<void>,
@@ -100,7 +99,7 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
     },
 
     fetchPlaylists: async () => {
-        const data = await fetchWithAuth<placeholder>('/api/apple/playlists/all')
+        const data = await fetchWithAuth<ApplePlaylist[]>('/api/apple/playlists/all')
         console.log(data)
     },
 

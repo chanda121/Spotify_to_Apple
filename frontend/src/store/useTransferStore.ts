@@ -11,6 +11,7 @@ interface TransferAction {
     removePlaylist: (playlist: SpotifyPlaylist) => void,
     togglePlaylist: (playlist: SpotifyPlaylist) => Promise<void>,
     isPlaylistInTransfer: (playlistId: string) => boolean,
+    test: () => Promise<void>,
     clearAll: () => void,
 }
 
@@ -68,6 +69,22 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
 
     clearAll: () => {
         set({ playlistsToTransfer: [] })
+    },
+
+    test: async () => {
+        console.log(`transfer playlist: ${get().playlistsToTransfer[0]}`)
+        const response = await fetch('api/apple/playlists/matchTracks', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                transferTracks: get().playlistsToTransfer[0].tracks
+            })
+        })
+
+        if (!response.ok) return
+        console.log(response)
     }
 
 }))

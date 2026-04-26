@@ -12,5 +12,6 @@ declare module 'express-session' {
     codeVerifier?: string
     appleDevToken?: string
     appleMusicUserToken?: string
+    appleStorefront?: string
   }
 }

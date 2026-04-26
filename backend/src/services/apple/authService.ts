@@ -1,3 +1,5 @@
+import createError from 'http-errors'
+import { getStorefront } from '../apple/userService.js'
 import { createJWT } from '../../utils/crypto.js';
 import type { Request, Response } from 'express';
 
@@ -12,9 +14,9 @@ const getDeveloperToken = () => {
     const timeInSec = Math.floor(Date.now() / 1000) - 10
     const expInSec = timeInSec + TOKEN_EXPIRY 
 
-    if(!keyId) throw new Error('Internal Server Error: Apple Key ID is missing from environment.')
-    if(!teamId) throw new Error('Internal Server Error: Apple Team ID is missing from environment.')
-    if(!origin) throw new Error('Internal Server Error: origins is missing from environment.')
+    if(!keyId) throw createError(500, 'Internal Server Error: Apple Key ID is missing from environment.')
+    if(!teamId) throw createError(500, 'Internal Server Error: Apple Team ID is missing from environment.')
+    if(!origin) throw createError(500, 'Internal Server Error: origins is missing from environment.')
 
 
     const header = {
@@ -39,18 +41,18 @@ export const getToken = async (req: Request, res: Response) => {
     })
 }
 
-export const saveToken = (req: Request, res: Response) => {
-    if(!req.body) {        
-        return res.status(500).json({
-            error: {
-                message: 'invalid music token...'
-            }
-        })}
-    const mutData = req.body
+export const saveToken = async (req: Request, res: Response) => {
+    const mut = req.body?.musicUserToken
+    if (!mut) throw createError(400, 'Invalid Music Token')
+    req.session.appleMusicUserToken = mut
 
-    console.log(mutData)
-    
-    req.session.appleMusicUserToken = mutData.musicUserToken
-    
+    const devToken = req.session.appleDevToken
+    if (!devToken) throw createError(401, 'Missing Apple Developer Token')
+
+    const storefront = await getStorefront(devToken, mut)
+    if (!storefront) throw createError(502, 'Unexpected storefront response from Apple')
+
+    req.session.appleStorefront = storefront
+
     res.json({ ok: true })
 }

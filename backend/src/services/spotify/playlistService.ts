@@ -94,9 +94,6 @@ export const getPlaylistTracks = async (
                             .map(wrapper => wrapper.item)
                             .filter(item => item !== null && item.type === 'track')
 
-    console.log(tracksPayload.slice(0,10))
-    console.log(tracksPayload.length)
-
     const tracks = tracksPayload.map(track => ({
         id: track.id,
         name: track.name,
