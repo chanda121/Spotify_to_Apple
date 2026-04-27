@@ -5,6 +5,13 @@ export interface AppleMusicAPIResponse<T> {
     next?: string
 }
 
+export interface AppleMusicAPISearchResponse {
+    results: {
+        playlists?: AppleMusicAPIResponse<AppleMusicResource<ApplePlaylistAttributes>>,
+        songs?: AppleMusicAPIResponse<AppleMusicResource<AppleSongAttributes>>,
+    }
+}
+
 export interface AppleMusicResource<A> {
     id: string,
     type: string,
