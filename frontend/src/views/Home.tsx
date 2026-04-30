@@ -26,7 +26,7 @@ export function Home() {
                         and a backdrop with a clock and currently playing music synced with Spotify!
                     </h2>
                 </div>
-                <div className='flex outline-1 grow'>Authorize access so the app can see your Spotify Data!</div>        
+                <div className='flex outline-1 grow items-center justify-center'>Authorize access so the app can see your Spotify Data!</div>        
             </div>
 
         </div>

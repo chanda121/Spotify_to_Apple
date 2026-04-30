@@ -1,6 +1,19 @@
+import { TransferPlaylist } from '@shared/types/spotify.js'
 import { fetchWithAppleAuth } from '../AppleAPIClient.js'
-import type { AppleMusicAPIResponse, AppleMusicResource, ApplePlaylistAttributes, ApplePlaylist } from '@shared/types/apple.js'
-import { checkAPIResponse } from '../SpotifyAPIClient.js'
+import { checkAPIResponse } from '../AppleAPIClient.js'
+import { matchTracks } from './transferService.js'
+import type { 
+    AppleMusicAPIResponse, 
+    AppleMusicResource, 
+    ApplePlaylistAttributes, 
+    ApplePlaylist, 
+    AppleLibraryCreationRequest,
+    TrackMatchResult, 
+    ApplePlaylistCreatedResponse,
+    PlaylistTransferResult,
+} from '@shared/types/apple.js'
+
+const MAX_SONGS_BATCH_SIZE = 100
 
 
 export const getPlaylists = async (devToken: string, mut: string): Promise<ApplePlaylist[]> => {
@@ -20,19 +33,79 @@ export const getPlaylists = async (devToken: string, mut: string): Promise<Apple
     }))
 }
 
-export const createPlaylist = async (devToken: string, mut: string) => {
-    const url = 'https://api.music.apple.com/v1/me/library/playlists'
-    const response = await fetch(url, {
+export const createPlaylist = async (devToken: string, mut: string, storefront: string, playlistToTransfer: TransferPlaylist) => {
+    const matchedTracksPayload = await matchTracks(devToken, mut, storefront, playlistToTransfer.tracks) as TrackMatchResult[]
+    const matchedTracks = matchedTracksPayload
+        .filter(matched => matched.matched !== null)
+        .map(matchTrack => ({
+            id: matchTrack.matched!.id,
+            type: matchTrack.matched!.type,
+        }))
+
+    const reqBody: AppleLibraryCreationRequest = {
+        attributes: {
+            name: playlistToTransfer.name,
+            description: playlistToTransfer.description
+        },
+    }
+
+    const createUrl = 'https://api.music.apple.com/v1/me/library/playlists'
+    const createPlaylistResponse = await fetch(createUrl, {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${devToken}`,
-            'Music-User-Token': mut
+            'Music-User-Token': mut,
+            'Content-Type': 'application/json',
         },
-        body: {
-            fuck: 'hi'
-        }
+        body: JSON.stringify(reqBody)
     })
+    await checkAPIResponse(createPlaylistResponse)
+    const playlistCreatedPayloadRaw = await createPlaylistResponse.json() as AppleMusicAPIResponse<ApplePlaylistCreatedResponse>
+    const playlistCreatedPayload = playlistCreatedPayloadRaw.data[0]
+    const createdPlaylistId = playlistCreatedPayload.id
 
-    await checkAPIResponse(response)
-    return await response.json()
+
+    const addTracksUrl = `https://api.music.apple.com/v1/me/library/playlists/${createdPlaylistId}/tracks`
+
+    for (let ind = 0; ind < matchedTracks.length; ind+=MAX_SONGS_BATCH_SIZE) {
+        const currTracks = matchedTracks.slice(ind, ind+MAX_SONGS_BATCH_SIZE)
+        const trackData = {
+            data: currTracks
+        }
+        const addTracksResponse = await fetch(addTracksUrl, {
+            method: 'POST',
+            headers: {
+                'Authorization': `Bearer ${devToken}`,
+                'Music-User-Token': mut,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(trackData)
+        })
+        await checkAPIResponse(addTracksResponse)        
+
+    }
+
+    
+    const playlistCreatedResponse: PlaylistTransferResult = {
+        sourcePlaylistId: playlistToTransfer.id,
+        sourceName: playlistToTransfer.name,
+        applePlaylist: {
+            id: playlistCreatedPayload.id,
+            type: playlistCreatedPayload.type,
+            attributes: {
+                name: playlistCreatedPayload.attributes.name,
+                isPublic: playlistCreatedPayload.attributes.isPublic,
+                canEdit: playlistCreatedPayload.attributes.canEdit,
+            }
+        },
+        matches: matchedTracksPayload,
+        stats: {
+            totalTracks: playlistToTransfer.tracks.length,
+            matchedByIsrc: matchedTracksPayload.filter(track => track.matchedBy === 'isrc').length,
+            matchedBySearch: matchedTracksPayload.filter(track => track.matchedBy === 'search').length,
+            unmatched: playlistToTransfer.tracks.length - matchedTracksPayload.filter(track => track.matched === null).length
+        }
+    }
+
+    return playlistCreatedResponse
 }

@@ -2,7 +2,7 @@ import type { Image, TransferTrack } from './spotify.js'
 //--------------------------------------------------- APPLE API RESOURCE INTERFACES ----------------------------------//
 export interface AppleMusicAPIResponse<T> {
     data: T[],
-    next?: string
+    next?: string,
 }
 
 export interface AppleMusicAPISearchResponse {
@@ -44,11 +44,55 @@ export interface AppleStorefrontAttributes {
     explicitContentPolicy: string,
 }
 
+export interface ApplePlaylistCreatedResponse {
+    id: string,
+    type: string,
+    attributes: {
+        artwork?: Image,
+        canEdit: boolean,
+        name: string,
+        isPublic: boolean,
+        hasCatalog: boolean,
+    }
+}
+
 //--------------------------------------------------- APPLE RESOURCE INTERFACES ----------------------------------//
 export interface ApplePlaylist {
     id: string,
     type: string,
     attributes: ApplePlaylistAttributes
+}
+
+export type AppleRootPlaylistFolderId = 'p.playlistsroot'
+
+export interface AppleRootPlaylistFolderIdResponse {
+    data: [],
+    meta: {
+        filters: {
+            identity: {
+                playlistsroot: [{
+                    id: AppleRootPlaylistFolderId,
+                    type: 'library-playlist-folders',
+                    href: '/v1/me/library/playlist-folders/p.playlistsroot'
+                }]
+            }
+        }
+    }
+}
+
+export interface AppleLibraryCreationRequest {
+    attributes: {
+        description: string,
+        name: string
+    },
+    relationships?: {
+        tracks: {
+            data: {id: string, type: string}[]
+        },
+        parent?: {
+            data: {id: string, type: string} //must be type: library-playlist-folders
+        }
+    }
 }
 
 export interface AppleSong {
@@ -59,6 +103,7 @@ export interface AppleSong {
 
 export interface AppleTrackCandidate {
     id: string,
+    type: string,
     name: string,
     artistName: string,
     albumName: string,
@@ -85,3 +130,4 @@ export interface PlaylistTransferResult {
         unmatched: number,
     }
 }
+

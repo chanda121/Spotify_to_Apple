@@ -86,6 +86,7 @@ export interface SpotifyUser {
 export interface SpotifyPlaylist {
     id: string,
     name: string,
+    description: string,
     ownerId: string,
     ownerName: string,
     images?: Image[],
@@ -144,6 +145,7 @@ export interface TransferTrack {
 export interface TransferPlaylist {
     id: string,
     name: string,
+    description: string,
     tracks: TransferTrack[]
 }
 
