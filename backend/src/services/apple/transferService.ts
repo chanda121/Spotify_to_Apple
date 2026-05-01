@@ -197,7 +197,6 @@ const scoreCandidate = (source: TransferTrack, candidate: AppleSong) => {
     return score
 }
 
-
 const normalizeString = (str: string | undefined): string => {
   return (str ?? '')
     .normalize('NFKD')
