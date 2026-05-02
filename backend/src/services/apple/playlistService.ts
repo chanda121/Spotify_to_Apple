@@ -33,7 +33,7 @@ export const getPlaylists = async (devToken: string, mut: string): Promise<Apple
     }))
 }
 
-export const createPlaylist = async (devToken: string, mut: string, storefront: string, playlistToTransfer: TransferPlaylist) => {
+export const createPlaylist = async (devToken: string, mut: string, storefront: string, playlistToTransfer: TransferPlaylist): Promise<PlaylistTransferResult> => {
     const matchedTracksPayload = await matchTracks(devToken, mut, storefront, playlistToTransfer.tracks) as TrackMatchResult[]
     const matchedTracks = matchedTracksPayload
         .filter(matched => matched.matched !== null)
@@ -103,9 +103,32 @@ export const createPlaylist = async (devToken: string, mut: string, storefront: 
             totalTracks: playlistToTransfer.tracks.length,
             matchedByIsrc: matchedTracksPayload.filter(track => track.matchedBy === 'isrc').length,
             matchedBySearch: matchedTracksPayload.filter(track => track.matchedBy === 'search').length,
-            unmatched: playlistToTransfer.tracks.length - matchedTracksPayload.filter(track => track.matched === null).length
+            unmatched: matchedTracksPayload.filter(track => track.matched === null).length
         }
     }
 
     return playlistCreatedResponse
+}
+
+export const createPlaylists = async (devToken: string, mut: string, storefront: string, playlistsToTransfer:TransferPlaylist[]) => {
+    const resultPromises: Promise<PlaylistTransferResult>[] = []
+
+    playlistsToTransfer.forEach((playlist) => {resultPromises.push(createPlaylist(devToken, mut, storefront, playlist))})
+    
+    const playlistTransferResults:PlaylistTransferResult[] = []
+
+    const results = await Promise.allSettled(resultPromises)
+
+    results.forEach((transferResult) => {
+        if (transferResult.status === 'fulfilled') {
+            playlistTransferResults.push(transferResult.value)
+        }
+    })
+
+    const failures = results.filter(transferResult => transferResult.status === 'rejected')
+    for (const failure of failures) {
+        console.error(`Failed to transfer playlist: ${failure.reason}`)
+    }
+
+    return playlistTransferResults
 }

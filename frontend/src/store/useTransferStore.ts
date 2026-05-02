@@ -8,7 +8,6 @@ interface TransferState {
 
 interface TransferAction {
     addPlaylist: (playlist: SpotifyPlaylist) => Promise<void>,
-    addMultiplePlaylists: (playlists: SpotifyPlaylist[]) => Promise<void>,
     removePlaylist: (playlist: SpotifyPlaylist) => void,
     togglePlaylist: (playlist: SpotifyPlaylist) => Promise<void>,
     isPlaylistInTransfer: (playlistId: string) => boolean,
@@ -49,10 +48,6 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
         }
 
         set(state => ({playlistsToTransfer: [...state.playlistsToTransfer, playlistToAdd]}))
-    },
-
-    addMultiplePlaylists: async (playlists: SpotifyPlaylist[]) => {
-        await Promise.all(playlists.map(p => get().addPlaylist(p)))
     },
 
     removePlaylist: (playlist: SpotifyPlaylist) => {
@@ -100,13 +95,13 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
     test: async () => {
         console.log('final number of playlists to be transferred: ', get().playlistsToTransfer.length)
         console.log(get().playlistsToTransfer[0].id, get().playlistsToTransfer[0].name)
-        const response = await fetch('api/apple/playlists/create-playlist', {
+        const response = await fetch('api/apple/playlists/create-playlists', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                transferPlaylist: get().playlistsToTransfer[0]
+                transferPlaylists: get().playlistsToTransfer
             })
         })
 

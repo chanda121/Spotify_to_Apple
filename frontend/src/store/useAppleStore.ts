@@ -97,7 +97,7 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
 
     unauthorize: async () => {
         const musicKit = window.MusicKit?.getInstance()
-
+        set({ isAuthorized: false })
         await musicKit?.unauthorize()
     },
 

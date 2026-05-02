@@ -63,23 +63,6 @@ export interface ApplePlaylist {
     attributes: ApplePlaylistAttributes
 }
 
-export type AppleRootPlaylistFolderId = 'p.playlistsroot'
-
-export interface AppleRootPlaylistFolderIdResponse {
-    data: [],
-    meta: {
-        filters: {
-            identity: {
-                playlistsroot: [{
-                    id: AppleRootPlaylistFolderId,
-                    type: 'library-playlist-folders',
-                    href: '/v1/me/library/playlist-folders/p.playlistsroot'
-                }]
-            }
-        }
-    }
-}
-
 export interface AppleLibraryCreationRequest {
     attributes: {
         description: string,

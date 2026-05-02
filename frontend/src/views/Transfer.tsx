@@ -19,7 +19,9 @@ export function Transfer() {
     const PLAYLIST_IMG_SIZE = 60
 
     const authorize = useAppleStore(state => state.authorize)
+    const unauthorize = useAppleStore(state => state.unauthorize)
     const isMusicKitAuthorized = useAppleStore(state => state.isAuthorized)
+
 
     const spotifyPlaylists = useSpotifyUserStore(state => state.playlists)
     const refreshPlaylists = useSpotifyUserStore(state => state.fetchPlaylists)
@@ -158,10 +160,24 @@ export function Transfer() {
                 </div>
             }
             <div className='flex flex-col gap-2'>
-                <div className='flex flex-col font-bold text-2xl justify-center items-center'>
-                    <div>This is the transfer!!</div>
-                    <div className='text-lg'>Select playlists to transfer below</div>
+                <div className='flex flex-col'>
+                    <div className='font-bold text-2xl'>
+                        This is the transfer!!
+                    </div>
+                    <div className='flex justify-between'>
+                        <div>Select playlists to transfer below</div>
+                        {
+                            isMusicKitAuthorized &&
+                            <button onClick={async () => {
+                                await unauthorize()
+                                addStatusMessage('logged out of apple music')
+                                }}>Logout of Apple Music</button>                            
+                        }
+
+                    </div>
+                         
                 </div>
+
                 {
                     !isMusicKitAuthorized &&
                     <div>
