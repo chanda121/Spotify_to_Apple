@@ -85,7 +85,6 @@ export const createPlaylist = async (devToken: string, mut: string, storefront: 
 
     }
 
-    
     const playlistCreatedResponse: PlaylistTransferResult = {
         sourcePlaylistId: playlistToTransfer.id,
         sourceName: playlistToTransfer.name,
