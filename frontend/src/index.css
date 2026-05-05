@@ -141,3 +141,12 @@ button:focus-visible {
 .selectable-row {
   background-color: var(--color-bg-secondary);
 }
+
+.app-surface {
+  background-color: var(--color-bg);
+  color: var(--color-text);
+}
+.app-surface-secondary {
+  background-color: var(--color-bg-secondary);
+  color: var(--color-text);
+}

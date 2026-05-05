@@ -12,22 +12,17 @@ interface AppleState {
     playlists: ApplePlaylist[],
     isLoadingPlaylists: boolean,
     playlistError: string | null
-
 }
 interface AppleAction {
     initializeMusicKit: () => Promise<void>,
     authorize: () => Promise<void>,
+    unauthorize: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
-    fetchLikedSongs: () => Promise<void>,
     getDevToken: () => Promise<string>
 }
 
 type devToken = {
     devToken: string
-}
-
-type placeholder = {
-    data: string
 }
 
 export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
@@ -95,23 +90,26 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
         })
 
         const message = await res.json()
+        set({ isAuthorized: true })
 
         if(!res.ok) console.error('error authorizing', message)
     },
 
-    fetchPlaylists: async () => {
-        const data = await fetchWithAuth<placeholder>('/api/apple/playlists/all')
-        console.log(data)
+    unauthorize: async () => {
+        const musicKit = window.MusicKit?.getInstance()
+        set({ isAuthorized: false })
+        await musicKit?.unauthorize()
     },
 
-    fetchLikedSongs: async () => {
-        const data = await fetchWithAuth<placeholder>('/api/apple/user/liked-songs')
+    fetchPlaylists: async () => {
+        const data = await fetchWithAuth<ApplePlaylist[]>('/api/apple/playlists/all')
+        console.log(data)
     },
 
     getDevToken: async () => {
         const data = await fetchWithAuth<devToken>('/api/apple/auth/dev-token')
 
         return data.devToken
-    }
+    },
 
 }))

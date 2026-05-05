@@ -1,8 +1,9 @@
 import express from 'express'
-import { getPlaylists, getLikedSongs } from '../../services/apple/playlistService.js'
-import { requireAppleAuth } from '../../middleware/requireAuth.js'
-import type { Request, Response } from 'express'
 import createError from 'http-errors'
+import { createPlaylist, createPlaylists, getPlaylists } from '../../services/apple/playlistService.js'
+import { requireAppleAuth } from '../../middleware/requireAuth.js'
+import { matchTracks } from '../../services/apple/transferService.js'
+import type { Request, Response } from 'express'
 
 const router = express.Router()
 
@@ -10,11 +11,53 @@ router.get('/all', requireAppleAuth, async (req: Request, res: Response) => {
     const devToken = req.session.appleDevToken
     const mut = req.session.appleMusicUserToken
 
-    if(!devToken || !mut) throw createError(401, 'Missing credentials')
+    if (!devToken || !mut) throw createError(401, 'Missing credentials')
 
-    return await getPlaylists(devToken, mut)
+    const data = await getPlaylists(devToken, mut)
+    return res.json(data)
 })
 
-router.get('/liked-songs', requireAppleAuth, getLikedSongs)
+router.post('/matchTracks', requireAppleAuth, async (req: Request, res: Response) => {
+    const devToken = req.session.appleDevToken
+    const mut = req.session.appleMusicUserToken
+    const storefront = req.session.appleStorefront ?? 'us'
+    const transferTracks = req.body.transferTracks
+
+    if (!devToken || !mut) throw createError(401, 'Missing credentials')
+
+    const data = await matchTracks(devToken, mut, storefront, transferTracks)
+    return res.json(data)
+})
+
+router.post('/create-playlist', requireAppleAuth, async (req: Request, res: Response) => {
+    const devToken = req.session.appleDevToken
+    const mut = req.session.appleMusicUserToken
+    const storefront = req.session.appleStorefront ?? 'us'
+    const transferPlaylist = req.body.transferPlaylist
+
+    if (!devToken || !mut) throw createError(401, 'Missing credentials')
+    
+    const data = await createPlaylist(devToken, mut, storefront, transferPlaylist)
+
+    return res.json(data)
+    
+})
+
+router.post('/create-playlists', requireAppleAuth, async (req: Request, res: Response) => {
+    const devToken = req.session.appleDevToken
+    const mut = req.session.appleMusicUserToken
+    const storefront = req.session.appleStorefront ?? 'us'
+    const transferPlaylists = req.body.transferPlaylists
+
+    if (!devToken || !mut) throw createError(401, 'Missing credentials')
+    if (!transferPlaylists) throw createError(400,)
+    if (transferPlaylists.length === 0) throw createError(400, 'At least one playlist required')
+    if (transferPlaylists.length > 5) throw createError(400, 'Passed more than 5 playlists')
+    
+
+    const data = await createPlaylists(devToken, mut, storefront, transferPlaylists)
+
+    return res.json(data)
+})
 
 export default router

@@ -28,6 +28,7 @@ export const getPlaylists = async (
     let playlists: SpotifyPlaylist[] = playlistsPayload.map((playlist: SpotifyAPIPlaylist) => ({
             id: playlist.id,
             name: playlist.name,
+            description: playlist.description,
             ownerId: playlist.owner.id,
             ownerName: playlist.owner.display_name,
             images: playlist.images
@@ -36,6 +37,7 @@ export const getPlaylists = async (
     playlists = [{
         id: 'LIKED_SONGS',
         name: 'Liked Songs',
+        description: 'Saved songs on Spotify',
         ownerId: 'test',
         ownerName: 'test',
     }, ...playlists]
@@ -93,9 +95,6 @@ export const getPlaylistTracks = async (
     const tracksPayload = playlistTracksPayload
                             .map(wrapper => wrapper.item)
                             .filter(item => item !== null && item.type === 'track')
-
-    console.log(tracksPayload.slice(0,10))
-    console.log(tracksPayload.length)
 
     const tracks = tracksPayload.map(track => ({
         id: track.id,
