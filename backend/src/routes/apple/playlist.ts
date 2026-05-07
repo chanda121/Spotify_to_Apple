@@ -50,7 +50,7 @@ router.post('/create-playlists', requireAppleAuth, async (req: Request, res: Res
     const transferPlaylists = req.body.transferPlaylists
 
     if (!devToken || !mut) throw createError(401, 'Missing credentials')
-    if (!transferPlaylists) throw createError(400,)
+    if (!transferPlaylists) throw createError(400, 'Missing playlist')
     if (transferPlaylists.length === 0) throw createError(400, 'At least one playlist required')
     if (transferPlaylists.length > 5) throw createError(400, 'Passed more than 5 playlists')
     

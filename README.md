@@ -9,3 +9,7 @@
 * Can show statistics (Top songs and artists you are listening to)
 * Backdrop that shows currently playing Spotify track
 * (TBD) Playlist transfer to Apple Music
+
+## Running application
+* Frontend: Navigate to `/frontend` and run `npm run dev`
+* Backend: Navigate to `/backend` and run `npm run dev`

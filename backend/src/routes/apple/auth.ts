@@ -1,5 +1,5 @@
 import express from 'express'
-import { getToken, saveToken } from '../../services/apple/authService'
+import { getToken, saveToken } from '../../services/apple/authService.js'
 
 const router = express.Router()
 

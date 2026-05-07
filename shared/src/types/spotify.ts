@@ -111,7 +111,7 @@ export interface SpotifyTrack {
     durationMs: number,
     artists: SpotifyArtist[],
     album: SpotifyAlbum,
-    isrc: string
+    isrc?: string
 }
 
 //--------------------------------------------------- SPOTIFY PLAYBACK INTERFACES --------------------------------------//
