@@ -1,5 +1,7 @@
 import express from 'express'
 import session from 'express-session'
+import { RedisStore } from 'connect-redis'
+import { redis, connectRedis } from './db/redis.js'
 
 import { notFoundHandler, errorHandler } from './middleware/errorHandler.js'
 
@@ -17,7 +19,15 @@ const port = process.env.PORT || 3000
 const sessionSecret = process.env.SESSION_SECRET
 if (!sessionSecret) throw new Error('SESSION_SECRET env var is not set')
 
+connectRedis()
+
+const redisStore = new RedisStore({
+    client: redis,
+    prefix: 'myapp',
+})
+
 app.use(session({
+    store: redisStore,
     secret: sessionSecret,
     resave: false,
     saveUninitialized: false,
