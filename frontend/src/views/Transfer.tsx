@@ -14,7 +14,8 @@ type statusMessage = {
 export function Transfer() {
     const [statusMessage, setStatusMessage] = useState<statusMessage[]>([])
     const [confirmationModalOpen, setConfirmationModalOpen] = useState<boolean>(false)
-    const [isTranferring, setIsTransferring] = useState<boolean>(false)
+    const [isTransferring, setIsTransferring] = useState<boolean>(false)
+    const [transferComplete, setTransferComplete] = useState<boolean>(false)
 
     const PLAYLIST_IMG_SIZE = 60
 
@@ -27,12 +28,12 @@ export function Transfer() {
     const refreshPlaylists = useSpotifyUserStore(state => state.fetchPlaylists)
 
     const togglePlaylist = useTransferStore(state => state.togglePlaylist)
-    const toggleSelectedPlaylistId = useTransferStore(state => state.toggleSelectedPlaylistId)
     const playlistsToTransfer = useTransferStore(state => state.playlistsToTransfer)
-    const selectedPlaylistIds = useTransferStore(state => state.selectedPlaylistIds)
-    const clearAllSelectedPlaylists = useTransferStore(state => state.clearAll)
-    const conformPlaylists = useTransferStore(state => state.conformPlaylists)
-    const test = useTransferStore(state => state.test)
+    const isPlaylistInTransfer = useTransferStore(state => state.isPlaylistInTransfer)
+    const transferResultsSuccess = useTransferStore(state => state.transferResultsSuccess)
+    const transferResultFail = useTransferStore(state => state.transferResultsFail)
+    const clearAll = useTransferStore(state => state.clearAll)
+    const transferPlaylists = useTransferStore(state => state.transferPlaylists)
 
     const addStatusMessage = (text: string, type: statusMessage['type'] = 'info') => {
         const id = crypto.randomUUID()
@@ -45,9 +46,7 @@ export function Transfer() {
     }
 
     const handleSelect = async (playlist: SpotifyPlaylist) => {
-        toggleSelectedPlaylistId(playlist.id)
-        console.log(selectedPlaylistIds)
-        await togglePlaylist(playlist)
+        togglePlaylist(playlist)
     }
 
     const handleTransferClick = () => {
@@ -55,24 +54,35 @@ export function Transfer() {
         // check if number selected between 1 and 5
         let hasErrors = false
 
-        if (selectedPlaylistIds.length === 0) {
+        if (playlistsToTransfer.length === 0) {
             addStatusMessage('No playlists selected! >=[', 'error')
             hasErrors = true
         }
-        if (selectedPlaylistIds.length > 5) {
+        if (playlistsToTransfer.length > 5) {
             addStatusMessage('More than 5 playlists selected!', 'error')
             hasErrors = true
         }
 
+        playlistsToTransfer.forEach(p => {
+            if (p.name.length > 200) {
+                addStatusMessage(`Playlist ${p.name} is over 200 characters!`, 'error')
+                hasErrors = true
+            }
+            if (p.description.length > 500) {
+                addStatusMessage(`Playlist ${p.name} is over 500 characters!`, 'error')
+                hasErrors = true
+            } 
+        })
+        
         if (!hasErrors) setConfirmationModalOpen(true)
     }
-    const handleConfirmTransferClick = () => {
-        conformPlaylists()
-        test()
-    }
-    
-    const clearAll = () => {
-        clearAllSelectedPlaylists()
+
+    const handleConfirmTransferClick = async () => {
+        setIsTransferring(true)
+        await transferPlaylists()
+        clearAll()
+        setIsTransferring(false)
+        setTransferComplete(true)
     }
 
     const displayPlaylists = () => {
@@ -80,7 +90,7 @@ export function Transfer() {
             return <div>No Playlists Yet</div>
         }
         return spotifyPlaylists.map((playlist) => {
-            const isSelected = selectedPlaylistIds.includes(playlist.id)
+            const isSelected = isPlaylistInTransfer(playlist.id)
 
             return (
                 <div className={`flex gap-2 items-center p-2 rounded-lg row-hover hover:translate-x-4 hover:cursor-pointer ${isSelected ? 'selectable-row' : ''}`}
@@ -112,8 +122,7 @@ export function Transfer() {
     }
 
     const displayPlaylistsToBeTransferred = () => {
-        const toBeTransferred = playlistsToTransfer.filter(playlist => selectedPlaylistIds.includes(playlist.id))
-        return toBeTransferred.map(playlist => {
+        return playlistsToTransfer.map(playlist => {
             return (
                 <div 
                     className='flex gap-1 items-center p-2'
@@ -126,37 +135,81 @@ export function Transfer() {
         })
     }
 
+    const displayPlaylistTransferResults = () => {
+        const finalResults = [...transferResultsSuccess, ...transferResultFail]
+
+        return finalResults.map(playlistResult => {
+            return (
+                <div
+                    className='flex gap-1 items-center p-2'
+                    key={playlistResult.sourcePlaylistId}
+                    id={playlistResult.sourcePlaylistId}
+                    >
+                        <div className={`font-bold text-sm truncate ${playlistResult.status === 'failed' ? 'text-red-500' : ''}`}>{playlistResult.sourceName}</div>
+                        {
+                            playlistResult.status === 'failed' &&
+                            <span className='font-bold text-sm truncate text-red-500 py-0.5'>
+                                {`Failed: ${playlistResult.error}`}
+                            </span>
+                        }
+                        {
+                            playlistResult.status === 'success' &&
+                            Object.entries(playlistResult.stats).map(([key, value]) => (
+                                <div className=''>
+                                    <span className='capitalize'>{key}</span>
+                                    <span className='font-medium'>{value}</span>
+                                </div>
+                            ))
+                        }
+                </div>
+            )
+        })
+
+    }
+
     return (
         <>
             {
-                confirmationModalOpen && 
+                confirmationModalOpen &&
                 <div 
                     className='fixed inset-0 z-50 flex items-center justify-center bg-black/50'
                     onClick={() => {
-                        if (!isTranferring) setConfirmationModalOpen(false)
+                        if (!isTransferring && !transferComplete) setConfirmationModalOpen(false)
                     }}
                     >
-                    <div
-                        className='w-full max-w-lg rounded-lg p-6 shadow-xl border-blue-100 border app-surface'
-                        onClick={event => event.stopPropagation()}>
-                        <h2 className='text-xl font-bold'>Confirm Transfer</h2>
-
-                        <div>
-                            {displayPlaylistsToBeTransferred()}
+                    {
+                        !transferComplete &&
+                        <div
+                            className='w-full max-w-lg rounded-lg p-6 shadow-xl border-blue-100 border app-surface'
+                            onClick={event => event.stopPropagation()}>
+                            <h2 className='text-xl font-bold'>Confirm Transfer</h2>
+                            <div>
+                                {displayPlaylistsToBeTransferred()}
+                            </div>
+                            <div className='mt-6 flex justify-end gap-3'>
+                                <button onClick={() => setConfirmationModalOpen(false)}>
+                                    Cancel
+                                </button>
+                                <button onClick={async () => {
+                                    handleConfirmTransferClick()
+                                }}>
+                                    Confirm Transfer
+                                </button>
+                            </div> 
+                        </div>                        
+                    }
+                    {
+                        transferComplete &&
+                        <div
+                            className='w-full max-w-lg rounded-lg p-6 shadow-xl border-blue-100 border app-surface'
+                            onClick={event => event.stopPropagation()}>
+                            <h2 className='text-xl font-bold'>Transfer Complete!</h2>
+                            <div>
+                                {displayPlaylistTransferResults()}
+                            </div>
                         </div>
+                    }
 
-                        <div className='mt-6 flex justify-end gap-3'>
-                            <button onClick={() => setConfirmationModalOpen(false)}>
-                                Cancel
-                            </button>
-                            <button onClick={async () => {
-                                handleConfirmTransferClick()
-                            }}>
-                                Confirm Transfer
-                            </button>
-                        </div>
-                        
-                    </div>
                 </div>
             }
             <div className='flex flex-col gap-2'>

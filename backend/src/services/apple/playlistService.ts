@@ -82,10 +82,10 @@ export const createPlaylist = async (devToken: string, mut: string, storefront: 
             body: JSON.stringify(trackData)
         })
         await checkAPIResponse(addTracksResponse)        
-
     }
 
     const playlistCreatedResponse: PlaylistTransferResult = {
+        status: 'success',
         sourcePlaylistId: playlistToTransfer.id,
         sourceName: playlistToTransfer.name,
         applePlaylist: {
@@ -109,7 +109,7 @@ export const createPlaylist = async (devToken: string, mut: string, storefront: 
     return playlistCreatedResponse
 }
 
-export const createPlaylists = async (devToken: string, mut: string, storefront: string, playlistsToTransfer:TransferPlaylist[]) => {
+export const createPlaylists = async (devToken: string, mut: string, storefront: string, playlistsToTransfer:TransferPlaylist[]): Promise<PlaylistTransferResult[]> => {
     const resultPromises: Promise<PlaylistTransferResult>[] = []
 
     playlistsToTransfer.forEach((playlist) => {resultPromises.push(createPlaylist(devToken, mut, storefront, playlist))})

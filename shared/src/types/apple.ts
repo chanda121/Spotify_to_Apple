@@ -101,16 +101,23 @@ export interface TrackMatchResult {
     confidence: 'exact' | 'fuzzy' | 'none',
 }
 
-export interface PlaylistTransferResult {
+export type PlaylistTransferResult = {
+    status: 'success',
     sourcePlaylistId: string, //spotify ID
     sourceName: string,
-    applePlaylist: ApplePlaylist | null,
+    applePlaylist: ApplePlaylist,
     matches: TrackMatchResult[],
     stats: {
         totalTracks: number,
         matchedByIsrc: number,
         matchedBySearch: number,
         unmatched: number,
-    }
+    } 
+} | {
+    status: 'failed'
+    sourcePlaylistId: string, //spotify ID
+    sourceName: string,
+    error: string
 }
+
 

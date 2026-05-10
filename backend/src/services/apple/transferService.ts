@@ -1,12 +1,68 @@
-import type { TransferTrack } from '@shared/types/spotify.js'
-import type { AppleMusicAPISearchResponse, AppleMusicAPIResponse, AppleMusicResource, AppleSong, AppleSongAttributes, TrackMatchResult } from '@shared/types/apple.js'
 import { checkAPIResponse } from '../AppleAPIClient.js'
+import { getPlaylistTracks } from '../spotify/playlistService.js'
+import { createPlaylists } from './playlistService.js'
+import type { TransferPlaylistInput, TransferPlaylist, TransferTrack} from '@shared/types/spotify.js'
+import type { AppleMusicAPISearchResponse, AppleMusicAPIResponse, AppleMusicResource, AppleSong, AppleSongAttributes, TrackMatchResult, PlaylistTransferResult } from '@shared/types/apple.js'
 
 const ISRC_BATCH_SIZE = 25 //hard limit
 const TOTAL_SCORE = 100
 
 type IndexedTrackMatchResult = TrackMatchResult & {
     index: number
+}
+
+export const transferPlaylists = async (appleDevToken: string, mut: string, appleStorefront: string, spotifyAccessToken: string,  playlists: TransferPlaylistInput[]):Promise<PlaylistTransferResult[]>  => {
+    // For each playlist id, get tracks, then match tracks, then call create playlists
+
+    const settledPlaylistsToTransfer = await Promise.all(
+        playlists.map(async (playlist) => {
+            try {
+                const tracks = await getPlaylistTracks(spotifyAccessToken, {id: playlist.id})
+                const transferTracks: TransferTrack[] = tracks.map(track => ({
+                    trackName: track.name,
+                    artistNames: track.artists.map(artist => artist.name),
+                    isrc: track.isrc,
+                    durationMs: track.durationMs,
+                    albumName: track.album.name
+                }))
+            
+                return {
+                    ok: true as const,
+                    playlist: {
+                        id: playlist.id,
+                        name: playlist.name,
+                        description: playlist.description,
+                        tracks: transferTracks
+                    }
+                }
+
+            } catch (err) {
+                return {
+                    ok: false as const,
+                    source: playlist,
+                    error: err instanceof Error ? err.message : String(err)
+                }
+            }
+
+    }))
+
+    const fulfilledTransferPlaylists: TransferPlaylist[] = settledPlaylistsToTransfer
+        .filter(transferPromise => transferPromise.ok === true)
+        .map(transferPromise => transferPromise.playlist)
+
+    
+    const failedPlaylists: PlaylistTransferResult[] = settledPlaylistsToTransfer
+        .filter(transferPromise => transferPromise.ok === false)
+        .map(p => ({
+            status: 'failed',
+            sourcePlaylistId: p.source.id,
+            sourceName: p.source.name,
+            error: p.error
+        }))
+
+    const successfulPlaylistsTransferred = await createPlaylists(appleDevToken, mut, appleStorefront, fulfilledTransferPlaylists)
+
+    return [...successfulPlaylistsTransferred, ...failedPlaylists]
 }
 
 export const matchTracks = async (devToken: string, mut: string, storefront: string, sourceTracks: TransferTrack[]) => {

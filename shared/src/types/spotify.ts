@@ -149,6 +149,12 @@ export interface TransferPlaylist {
     tracks: TransferTrack[]
 }
 
+export interface TransferPlaylistInput {
+    id: string,
+    name: string,
+    description: string,
+}
+
 //--------------------------------------------------- SPOTIFY TOKEN INTERFACES -----------------------------------------//
 export interface SpotifyAPIToken {
     access_token: string,

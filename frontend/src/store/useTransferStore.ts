@@ -1,66 +1,48 @@
 import { create } from 'zustand'
-import { useSpotifyUserStore } from './useSpotifyUserStore'
-import type { TransferPlaylist, TransferTrack, SpotifyPlaylist } from '@shared/types/spotify'
+import type { SpotifyPlaylist, TransferPlaylistInput } from '@shared/types/spotify.js'
+import type { PlaylistTransferResult } from '@shared/types/apple.js'
 interface TransferState {
-    playlistsToTransfer: TransferPlaylist[],
-    selectedPlaylistIds: string[],
+    playlistsToTransfer: TransferPlaylistInput[],
+    transferResultsSuccess: PlaylistTransferResult[],
+    transferResultsFail: PlaylistTransferResult[],
 }
 
 interface TransferAction {
-    addPlaylist: (playlist: SpotifyPlaylist) => Promise<void>,
-    removePlaylist: (playlist: SpotifyPlaylist) => void,
-    togglePlaylist: (playlist: SpotifyPlaylist) => Promise<void>,
+    addPlaylist: (playlist: SpotifyPlaylist) => void,
+    removePlaylist: (playlistId: string) => void,
+    togglePlaylist: (playlist: SpotifyPlaylist) => void,
     isPlaylistInTransfer: (playlistId: string) => boolean,
 
-    selectPlaylistId: (id: string) => void,
-    deselectPlaylistId: (id: string) => void,
-    toggleSelectedPlaylistId: (id: string) => void,
-
-    conformPlaylists: () => void,
-    test: () => Promise<void>,
+    transferPlaylists: () => Promise<void>,
     clearAll: () => void,
 }
 
 export const useTransferStore = create<TransferState & TransferAction>((set, get) => ({
     playlistsToTransfer: [],
-    selectedPlaylistIds: [],
+    transferResultsSuccess: [],
+    transferResultsFail: [],
 
-    addPlaylist: async (playlist: SpotifyPlaylist) => {
-        if (get().isPlaylistInTransfer(playlist.id)) return
-        const tracks = await useSpotifyUserStore.getState().fetchPlaylistItems(playlist)
-        if (get().isPlaylistInTransfer(playlist.id)) return   // post-await recheck
-
-        if (!tracks) return
-
-        const transferTracks: TransferTrack[] = tracks.map(track => ({
-            trackName: track.name,
-            artistNames: track.artists.map(artist => artist.name),
-            isrc: track.isrc,
-            durationMs: track.durationMs,
-            albumName: track.album.name
-        }))
-
-        const playlistToAdd: TransferPlaylist = {
+    addPlaylist: (playlist: SpotifyPlaylist) => {
+        const playlistToAdd: TransferPlaylistInput = {
             id: playlist.id,
             name: playlist.name,
             description: playlist.description,
-            tracks: transferTracks,
         }
 
         set(state => ({playlistsToTransfer: [...state.playlistsToTransfer, playlistToAdd]}))
     },
 
-    removePlaylist: (playlist: SpotifyPlaylist) => {
-        const newPlaylists = get().playlistsToTransfer.filter(p => p.id !== playlist.id)
+    removePlaylist: (playlistId: string) => {
+        const newPlaylists = get().playlistsToTransfer.filter(p => p.id !== playlistId)
 
         set({ playlistsToTransfer: newPlaylists })
     },
 
-    togglePlaylist: async (playlist: SpotifyPlaylist) => {
+    togglePlaylist: (playlist: SpotifyPlaylist) => {
         if (get().isPlaylistInTransfer(playlist.id)) {
-            get().removePlaylist(playlist)
+            get().removePlaylist(playlist.id)
         } else {
-            await get().addPlaylist(playlist)
+            get().addPlaylist(playlist)
         }
     },
 
@@ -72,29 +54,14 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
     },
 
     clearAll: () => {
-        set({ playlistsToTransfer: [], selectedPlaylistIds: [] })
+        set({ playlistsToTransfer: [], transferResultsSuccess: [], transferResultsFail: [] })
     },
 
-    selectPlaylistId: (id: string) => {
-        set(state => ({selectedPlaylistIds: [...state.selectedPlaylistIds, id]}))
-    },
-    deselectPlaylistId: (id: string) => {
-        if (get().selectedPlaylistIds.includes(id)) {
-            set(state => ({selectedPlaylistIds: state.selectedPlaylistIds.filter(selectedId => selectedId !== id)}))
-        }
-    },
-    toggleSelectedPlaylistId: (id: string) => {
-        if (get().selectedPlaylistIds.includes(id)) get().deselectPlaylistId(id)
-        else get().selectPlaylistId(id)
-    },
-
-    conformPlaylists: () => {
-        set(state => ({playlistsToTransfer: state.playlistsToTransfer.filter(p => state.selectedPlaylistIds.includes(p.id))}))
-    },
-
-    test: async () => {
-        console.log('final number of playlists to be transferred: ', get().playlistsToTransfer.length)
-        console.log(get().playlistsToTransfer[0].id, get().playlistsToTransfer[0].name)
+    /**
+     * Sets results of playlist transfer
+     * @returns result data of playlist transfers
+     */
+    transferPlaylists: async () => {
         const response = await fetch('api/apple/playlists/create-playlists', {
             method: 'POST',
             headers: {
@@ -107,10 +74,12 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
 
         if (!response.ok) return
 
-        const data = await response.json()
-        console.log(data)
+        const data = await response.json() as PlaylistTransferResult[]
+        const successResults = data.filter(d => d.status === 'success')
+        const failResults = data.filter(d => d.status === 'failed')
 
-        return data
+        set({ transferResultsSuccess: successResults, transferResultsFail: failResults})
+        console.log(data)
     }
 
 }))
