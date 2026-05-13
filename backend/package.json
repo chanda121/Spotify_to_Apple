@@ -16,6 +16,7 @@
     "express": "^5.2.1",
     "express-session": "^1.19.0",
     "http-errors": "^2.0.0",
+    "p-retry": "^8.0.0",
     "redis": "^5.12.1"
   },
   "devDependencies": {

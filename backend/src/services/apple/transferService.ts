@@ -37,6 +37,7 @@ export const transferPlaylists = async (appleDevToken: string, mut: string, appl
                 }
 
             } catch (err) {
+                console.error(err)
                 return {
                     ok: false as const,
                     source: playlist,
@@ -66,7 +67,7 @@ export const transferPlaylists = async (appleDevToken: string, mut: string, appl
 }
 
 export const matchTracks = async (devToken: string, mut: string, storefront: string, sourceTracks: TransferTrack[]) => {
-     const indexedTracks = sourceTracks.map((track, index) => ({ index, track }))
+    const indexedTracks = sourceTracks.map((track, index) => ({ index, track }))
     const isrcTracks = indexedTracks.filter(({ track }) => track.isrc)
     const searchTracks = indexedTracks.filter(({ track }) => !track.isrc)
 
@@ -134,10 +135,11 @@ export const matchTracks = async (devToken: string, mut: string, storefront: str
     const searchUrl = `https://api.music.apple.com/v1/catalog/${storefront}/search`
     for (const searchTrackItem of searchTracks) {
         const searchTrack = searchTrackItem.track
-        const searchTerms = `${searchTrack.trackName} ${searchTrack.artistNames.join(' ')} ${searchTrack.albumName ?? ''}`
+        const searchTerms = `${searchTrack.trackName} ${searchTrack.artistNames.join(' ')} ${searchTrack.albumName}`
         const params = new URLSearchParams()
         params.set('types', 'songs')
         params.set('term', searchTerms)
+        params.set('with', 'topResults')
         params.set('limit', '5')
 
         const response = await fetch(`${searchUrl}?${params}`, {
@@ -147,12 +149,33 @@ export const matchTracks = async (devToken: string, mut: string, storefront: str
                 'Music-User-Token': mut
             }
         })
-
         await checkAPIResponse(response)
 
-        const searchPayload = await response.json() as AppleMusicAPISearchResponse
-        const songsPayload = searchPayload.results.songs?.data ?? []
-        
+        let searchPayload = await response.json() as AppleMusicAPISearchResponse
+        let songsPayload = searchPayload.results.songs?.data ?? []
+
+        if (songsPayload.length === 0) {
+            console.log(`source: ${searchTrack.trackName} with no track matches`)
+            const secondSearchTerms = `${searchTrack.trackName}}`
+            const secondSearchParams = new URLSearchParams()
+            secondSearchParams.set('types', 'songs')
+            secondSearchParams.set('term', secondSearchTerms)
+            secondSearchParams.set('with', 'topResults')
+            secondSearchParams.set('limit', '5')
+
+            const response = await fetch(`${searchUrl}?${params}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': `Bearer ${devToken}`,
+                    'Music-User-Token': mut
+                }
+            })
+            await checkAPIResponse(response)
+
+            searchPayload = await response.json() as AppleMusicAPISearchResponse
+            songsPayload = searchPayload.results.songs?.data ?? []
+        }
+
         if (songsPayload.length === 0) {
             searchMatchResults.push({
                 index: searchTrackItem.index,
@@ -172,8 +195,11 @@ export const matchTracks = async (devToken: string, mut: string, storefront: str
             let confidence = 'none' as 'exact' | 'fuzzy' | 'none'
 
             if (confidenceScore > 0.85*TOTAL_SCORE) confidence = 'exact'
-            else if (confidenceScore > 0.5*TOTAL_SCORE) confidence = 'fuzzy'
+            else if (confidenceScore > 0.35*TOTAL_SCORE) confidence = 'fuzzy'
 
+            // TESTING LINE HERE
+            if (confidence === 'none') console.log(`confidence is none\nBest candidate: ${bestCandidate.attributes.name} by ${bestCandidate.attributes.artistName}\nsource: ${searchTrack.trackName} by ${searchTrack.artistNames}\nscore: ${confidenceScore}`)
+            
             searchMatchResults.push({
                     index: searchTrackItem.index,
                     source: searchTrack,

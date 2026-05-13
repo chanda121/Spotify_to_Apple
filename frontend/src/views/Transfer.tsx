@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppleStore } from '../store/useAppleStore'
 import { useSpotifyUserStore } from '../store/useSpotifyUserStore'
 import { useTransferStore } from '../store/useTransferStore'
+import { humanizedTransferResults } from '../types/humanizedKeys.js'
 import MusicalNoteIcon from '../assets/musical-note.svg'
 import type { SpotifyPlaylist } from '@shared/types/spotify'
 
@@ -32,7 +33,8 @@ export function Transfer() {
     const isPlaylistInTransfer = useTransferStore(state => state.isPlaylistInTransfer)
     const transferResultsSuccess = useTransferStore(state => state.transferResultsSuccess)
     const transferResultFail = useTransferStore(state => state.transferResultsFail)
-    const clearAll = useTransferStore(state => state.clearAll)
+    const clearTransferPlaylists = useTransferStore(state => state.clearTransferPlaylists)
+    const clearResults = useTransferStore(state => state.clearResults)
     const transferPlaylists = useTransferStore(state => state.transferPlaylists)
 
     const addStatusMessage = (text: string, type: statusMessage['type'] = 'info') => {
@@ -80,7 +82,7 @@ export function Transfer() {
     const handleConfirmTransferClick = async () => {
         setIsTransferring(true)
         await transferPlaylists()
-        clearAll()
+        clearTransferPlaylists()
         setIsTransferring(false)
         setTransferComplete(true)
     }
@@ -137,30 +139,32 @@ export function Transfer() {
 
     const displayPlaylistTransferResults = () => {
         const finalResults = [...transferResultsSuccess, ...transferResultFail]
-
         return finalResults.map(playlistResult => {
             return (
                 <div
-                    className='flex gap-1 items-center p-2'
+                    className='flex flex-col gap-1 p-2'
                     key={playlistResult.sourcePlaylistId}
                     id={playlistResult.sourcePlaylistId}
                     >
-                        <div className={`font-bold text-sm truncate ${playlistResult.status === 'failed' ? 'text-red-500' : ''}`}>{playlistResult.sourceName}</div>
+                        <div className={`font-bold text-md truncate ${playlistResult.status === 'failed' ? 'text-red-500' : ''}`}>{playlistResult.sourceName}</div>
                         {
                             playlistResult.status === 'failed' &&
-                            <span className='font-bold text-sm truncate text-red-500 py-0.5'>
+                            <span className='font-bold text-sm truncate text-red-500'>
                                 {`Failed: ${playlistResult.error}`}
                             </span>
                         }
-                        {
-                            playlistResult.status === 'success' &&
-                            Object.entries(playlistResult.stats).map(([key, value]) => (
-                                <div className=''>
-                                    <span className='capitalize'>{key}</span>
-                                    <span className='font-medium'>{value}</span>
-                                </div>
-                            ))
-                        }
+                        <div className='border-l'>
+                            {
+                                playlistResult.status === 'success' &&
+                                Object.entries(playlistResult.stats).map(([key, value]) => (
+                                    <div className='translate-x-2'>
+                                        <span className='capitalize'>{humanizedTransferResults[key as keyof typeof humanizedTransferResults]}: </span>
+                                        <span className='font-medium'>{value}</span>
+                                    </div>
+                                ))
+                            }                            
+                        </div>
+
                 </div>
             )
         })
@@ -207,6 +211,15 @@ export function Transfer() {
                             <div>
                                 {displayPlaylistTransferResults()}
                             </div>
+                            <div className='mt-4 flex justify-end'>
+                                <button onClick={() => {
+                                    setConfirmationModalOpen(false)
+                                    setTransferComplete(false)
+                                    clearResults()                                    
+                                }}>
+                                    OK
+                                </button>
+                            </div>
                         </div>
                     }
 
@@ -247,11 +260,11 @@ export function Transfer() {
                             <div className='flex gap-5'>
                                 <button onClick={async () => {
                                     addStatusMessage('Playlists refreshed')
-                                    clearAll()
+                                    clearTransferPlaylists()
                                     await refreshPlaylists()
                                 }}>Refresh Playlists</button>
                                 <button onClick={() => {
-                                    clearAll()
+                                    clearTransferPlaylists()
                                 }}> Clear Selection </button>
                             </div>
                             

@@ -14,7 +14,8 @@ interface TransferAction {
     isPlaylistInTransfer: (playlistId: string) => boolean,
 
     transferPlaylists: () => Promise<void>,
-    clearAll: () => void,
+    clearTransferPlaylists: () => void,
+    clearResults: () => void,
 }
 
 export const useTransferStore = create<TransferState & TransferAction>((set, get) => ({
@@ -53,8 +54,12 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
         return false
     },
 
-    clearAll: () => {
-        set({ playlistsToTransfer: [], transferResultsSuccess: [], transferResultsFail: [] })
+    clearTransferPlaylists: () => {
+        set({ playlistsToTransfer: []})
+    },
+
+    clearResults: () => {
+        set({ transferResultsSuccess: [], transferResultsFail: [] })
     },
 
     /**
@@ -72,7 +77,11 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
             })
         })
 
-        if (!response.ok) return
+        if (!response.ok) {
+            const errMsg = await response.json()
+            console.error(`error code: ${response.status} error: ${errMsg}`)
+            return
+        }
 
         const data = await response.json() as PlaylistTransferResult[]
         const successResults = data.filter(d => d.status === 'success')

@@ -1,28 +1,40 @@
 import createError from 'http-errors'
+import pRetry from 'p-retry'
+import { HttpError } from 'http-errors'
 import type { SpotifyItemsResponse } from '@shared/types/spotify.js'
 
 export const fetchWithAuth = async <T>(accessToken: string, url: string):Promise<T | null> => {
-    const response = await fetchUrl(url, accessToken)
-    await checkAPIResponse(response) 
+    return await pRetry<T | null>(async () => {
+        const response = await fetchUrl(url, accessToken)
+        await checkAPIResponse(response) 
 
-    if (response.status === 204) return null
-    return await response.json() as T
+        if (response.status === 204) return null
+        return await response.json() as T        
+    },
+    {	
+        onFailedAttempt: ({error, attemptNumber, retriesLeft, retriesConsumed, retryDelay}) => {
+		    console.log(`Attempt ${attemptNumber} failed. Retrying in ${retryDelay}ms. ${retriesLeft} retries left.`)
+	    },
+        shouldRetry: ({ error }) => ((error instanceof HttpError && (error.status === 429 || /5\d{2}/.test(String(error.status)))) ||
+            !(error instanceof HttpError)),
+        maxTimeout: 5000, //5 seconds max between timeout attempts
+        randomize: true, // randomize for jitter
+        retries: 3    
+    })
+
 }
 
 export const fetchAllPages = async <T>(accessToken: string, url: string):Promise<T[]> => {
-    let response = await fetchUrl(url, accessToken)
-    await checkAPIResponse(response)
+    let responseJson = await fetchWithAuth<SpotifyItemsResponse<T>>(accessToken, url)
 
-    if (response.status === 204) return []
-    let responseData = await response.json() as SpotifyItemsResponse<T>
-    let data = responseData.items
+    if (!responseJson) return []
+    let data = responseJson.items
 
-    while(responseData.next) {
-        response = await fetchUrl(responseData.next, accessToken)
-        await checkAPIResponse(response)
-
-        responseData = await response.json() as SpotifyItemsResponse<T>
-        data = data.concat(responseData.items)
+    while(responseJson && responseJson.next) {
+        responseJson = await fetchWithAuth<SpotifyItemsResponse<T>>(accessToken, responseJson.next)
+        
+        if(!responseJson) continue
+        data = data.concat(responseJson.items)
     }
 
     return data
