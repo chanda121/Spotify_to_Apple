@@ -17,7 +17,7 @@ export const fetchWithAuth = async <T>(accessToken: string, url: string):Promise
 	    },
         shouldRetry: ({ error }) => ((error instanceof HttpError && (error.status === 429 || /5\d{2}/.test(String(error.status)))) ||
             !(error instanceof HttpError)),
-        maxTimeout: 5000, //5 seconds max between timeout attempts
+        maxTimeout: 15000, //15 seconds max between attempts
         randomize: true, // randomize for jitter
         retries: 3    
     })
