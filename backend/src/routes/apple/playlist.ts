@@ -34,7 +34,6 @@ router.post('/create-playlists', requireAppleAuth, requireSpotifyAuth, async (re
 })
 
 const parseTransferRequest = (body: unknown): TransferPlaylistInput[] => {
-    console.log(body)
     if (!body || typeof body !== 'object') throw createError(400, 'Invalid body')
     const raw = (body as any).transferPlaylists
     if (!Array.isArray(raw)) throw createError(400, 'transferPlaylists must be an array')
@@ -45,8 +44,10 @@ const parseTransferRequest = (body: unknown): TransferPlaylistInput[] => {
     for (const item of raw) {
         if (typeof item?.id !== 'string' || item.id.length === 0) throw createError(400, 'A playlist id seems off...')
         if (typeof item?.name !== 'string' || item.name.length > 200) throw createError(400, 'Playlist name over 200 characters')
-        if (typeof item?.description !== 'string' || item.description.length > 500) throw createError(400, 'Playlist description over 500 characters')
-        parsed.push({id: item.id, name: item.name, description: item.description})
+        if (item.description) {
+            if (item.description.length > 500) throw createError(400, 'Playlist description over 500 characters')
+        }
+        parsed.push({id: item.id, name: item.name, description: item.description ?? ''})
     }
 
     return [...new Map(parsed.map(p => [p.id, p])).values()] //dedupe

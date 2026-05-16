@@ -90,7 +90,7 @@ export function Stats() {
                                     <div key={artist.id} className='flex items-center gap-4 rounded-xl p-4 row-hover'>
 
                                         {
-                                            artist.images?.length && artist.images[2] &&
+                                            artist.images?.length && artist.images[1] &&
                                             <img src={artist.images[1]?.url}
                                                 width={ARTIST_IMG_SIZE}
                                                 height={ARTIST_IMG_SIZE}

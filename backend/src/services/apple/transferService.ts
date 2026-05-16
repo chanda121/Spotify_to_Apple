@@ -1,4 +1,4 @@
-import { checkAPIResponse } from '../AppleAPIClient.js'
+import { fetchWithAppleAuth } from '../AppleAPIClient.js'
 import { getPlaylistTracks } from '../spotify/playlistService.js'
 import { createPlaylists } from './playlistService.js'
 import type { TransferPlaylistInput, TransferPlaylist, TransferTrack} from '@shared/types/spotify.js'
@@ -83,18 +83,10 @@ export const matchTracks = async (devToken: string, mut: string, storefront: str
         const params = new URLSearchParams()
         params.set('filter[isrc]', batch.join(','))
 
-        const response = await fetch(`${isrcUrl}?${params}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${devToken}`,
-                'Music-User-Token': mut
-            }
-        })
+        let trackPayload = await fetchWithAppleAuth<AppleMusicAPIResponse<AppleMusicResource<AppleSongAttributes>>>(devToken, mut, `${isrcUrl}?${params}`)
 
-        await checkAPIResponse(response)
-
-        const trackPayload = await response.json() as AppleMusicAPIResponse<AppleMusicResource<AppleSongAttributes>>
-        irscMatchPayload = [...irscMatchPayload, ...trackPayload.data]
+        if (!trackPayload) continue 
+        else irscMatchPayload = [...irscMatchPayload, ...trackPayload.data]
     }
 
     const isrcGroupMap = groupBy(irscMatchPayload, (song) => song.attributes.isrc)
@@ -135,45 +127,38 @@ export const matchTracks = async (devToken: string, mut: string, storefront: str
     const searchUrl = `https://api.music.apple.com/v1/catalog/${storefront}/search`
     for (const searchTrackItem of searchTracks) {
         const searchTrack = searchTrackItem.track
-        const searchTerms = `${searchTrack.trackName} ${searchTrack.artistNames.join(' ')} ${searchTrack.albumName}`
+        const searchTerms = `${searchTrack.trackName} ${searchTrack.artistNames.join(' ')} ${searchTrack.albumName ?? ''}`
         const params = new URLSearchParams()
         params.set('types', 'songs')
         params.set('term', searchTerms)
         params.set('with', 'topResults')
         params.set('limit', '5')
 
-        const response = await fetch(`${searchUrl}?${params}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': `Bearer ${devToken}`,
-                'Music-User-Token': mut
-            }
-        })
-        await checkAPIResponse(response)
-
-        let searchPayload = await response.json() as AppleMusicAPISearchResponse
-        let songsPayload = searchPayload.results.songs?.data ?? []
+        let searchPayload = await fetchWithAppleAuth<AppleMusicAPISearchResponse>(devToken, mut, `${searchUrl}?${params}`)
+        let songsPayload = searchPayload?.results.songs?.data ?? []
 
         if (songsPayload.length === 0) {
             console.log(`source: ${searchTrack.trackName} with no track matches`)
-            const secondSearchTerms = `${searchTrack.trackName}}`
+            const secondSearchTerms = `${searchTrack.trackName}`
             const secondSearchParams = new URLSearchParams()
             secondSearchParams.set('types', 'songs')
             secondSearchParams.set('term', secondSearchTerms)
             secondSearchParams.set('with', 'topResults')
             secondSearchParams.set('limit', '5')
 
-            const response = await fetch(`${searchUrl}?${params}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${devToken}`,
-                    'Music-User-Token': mut
-                }
-            })
-            await checkAPIResponse(response)
+            // const response = await fetch(`${searchUrl}?${params}`, {
+            //     method: 'GET',
+            //     headers: {
+            //         'Authorization': `Bearer ${devToken}`,
+            //         'Music-User-Token': mut
+            //     }
+            // })
+            // await checkAPIResponse(response)
 
-            searchPayload = await response.json() as AppleMusicAPISearchResponse
-            songsPayload = searchPayload.results.songs?.data ?? []
+            // searchPayload = await response.json() as AppleMusicAPISearchResponse
+
+            searchPayload = await fetchWithAppleAuth<AppleMusicAPISearchResponse>(devToken, mut, `${searchUrl}?${secondSearchParams}`)
+            songsPayload = searchPayload?.results.songs?.data ?? []
         }
 
         if (songsPayload.length === 0) {

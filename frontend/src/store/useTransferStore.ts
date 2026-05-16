@@ -67,7 +67,7 @@ export const useTransferStore = create<TransferState & TransferAction>((set, get
      * @returns result data of playlist transfers
      */
     transferPlaylists: async () => {
-        const response = await fetch('api/apple/playlists/create-playlists', {
+        const response = await fetch('/api/apple/playlists/create-playlists', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

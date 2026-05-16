@@ -5,7 +5,6 @@ import type { Request, Response } from 'express';
 
 const keyId = process.env.APPLE_KID
 const teamId = process.env.APPLE_TEAM_ID
-const origin = [ process.env.BACKEND_URL ]
 
 //60 sec/min * 60 min/hr * 24 hr/day * 30 days/month * 2 months
 const TOKEN_EXPIRY = 60 * 60 * 24 * 30 * 2 //2 months in seconds
@@ -16,8 +15,6 @@ const getDeveloperToken = () => {
 
     if(!keyId) throw createError(500, 'Internal Server Error: Apple Key ID is missing from environment.')
     if(!teamId) throw createError(500, 'Internal Server Error: Apple Team ID is missing from environment.')
-    if(!origin) throw createError(500, 'Internal Server Error: origins is missing from environment.')
-
 
     const header = {
         'alg': 'ES256',
@@ -53,6 +50,14 @@ export const saveToken = async (req: Request, res: Response) => {
     if (!storefront) throw createError(502, 'Unexpected storefront response from Apple')
 
     req.session.appleStorefront = storefront
+
+    res.json({ ok: true })
+}
+
+export const unsaveToken = async (req: Request, res: Response) => {
+    req.session.appleMusicUserToken = undefined
+    req.session.appleDevToken = undefined
+    req.session.appleStorefront = undefined
 
     res.json({ ok: true })
 }

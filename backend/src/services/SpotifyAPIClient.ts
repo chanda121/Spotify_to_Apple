@@ -13,7 +13,7 @@ export const fetchWithAuth = async <T>(accessToken: string, url: string):Promise
     },
     {	
         onFailedAttempt: ({error, attemptNumber, retriesLeft, retriesConsumed, retryDelay}) => {
-		    console.log(`Attempt ${attemptNumber} failed. Retrying in ${retryDelay}ms. ${retriesLeft} retries left.`)
+		    console.log(`IN SPOTIFY FETCH. Attempt ${attemptNumber} failed. Retrying in ${retryDelay}ms. ${retriesLeft} retries left.`)
 	    },
         shouldRetry: ({ error }) => ((error instanceof HttpError && (error.status === 429 || /5\d{2}/.test(String(error.status)))) ||
             !(error instanceof HttpError)),
@@ -21,7 +21,6 @@ export const fetchWithAuth = async <T>(accessToken: string, url: string):Promise
         randomize: true, // randomize for jitter
         retries: 3    
     })
-
 }
 
 export const fetchAllPages = async <T>(accessToken: string, url: string):Promise<T[]> => {

@@ -59,11 +59,12 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
             const devToken = await get().getDevToken()
 
             if(!window.MusicKit) throw new Error('Music Kit failed to load!')
-                await window.MusicKit.configure({
-                    developerToken: devToken,
-                    app: {name: 'S2A'}
-                })
+            await window.MusicKit.configure({
+                developerToken: devToken,
+                app: {name: 'S2A'}
+            })
             
+            set({ musicKitConfigured: true })
 
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Unexepected error while initializing Music Kit'
@@ -90,9 +91,9 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
         })
 
         const message = await res.json()
-        set({ isAuthorized: true })
 
         if(!res.ok) console.error('error authorizing', message)
+        set({ isAuthorized: true })
     },
 
     unauthorize: async () => {
@@ -103,7 +104,7 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
 
     fetchPlaylists: async () => {
         const data = await fetchWithAuth<ApplePlaylist[]>('/api/apple/playlists/all')
-        console.log(data)
+        set({ playlists: data})
     },
 
     getDevToken: async () => {

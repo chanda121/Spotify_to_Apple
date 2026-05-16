@@ -62,7 +62,7 @@ export interface SpotifyAPITrack {
     album: SpotifyAPIAlbum,
     type?: string,
     external_ids: {
-        isrc: string
+        isrc?: string
     }
 }
 export interface SpotifyAPIPlaylistTrack {

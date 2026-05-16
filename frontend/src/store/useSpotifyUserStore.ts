@@ -80,14 +80,12 @@ export const useSpotifyUserStore = create<SpotifyUserState & SpotifyUserAction>(
     isLoadingTopTracks: false,
     isLoadingTopArtists: false,
     isLoadingPlaylists: false,
-    isLoadingPlaylistTracks: false,
 
     // Error states
     userError: null,
     topTracksError: null,
     topArtistsError: null,
     playlistsError: null,
-    playlistTracksError: null,
 
     fetchUser: async () => {
         await runAsyncAction({

@@ -4,6 +4,7 @@ import { useSpotifyUserStore } from '../store/useSpotifyUserStore'
 import { useTransferStore } from '../store/useTransferStore'
 import { humanizedTransferResults } from '../types/humanizedKeys.js'
 import MusicalNoteIcon from '../assets/musical-note.svg'
+import { Commet } from 'react-loading-indicators'
 import type { SpotifyPlaylist } from '@shared/types/spotify'
 
 type statusMessage = {
@@ -191,14 +192,24 @@ export function Transfer() {
                                 {displayPlaylistsToBeTransferred()}
                             </div>
                             <div className='mt-6 flex justify-end gap-3'>
-                                <button onClick={() => setConfirmationModalOpen(false)}>
-                                    Cancel
-                                </button>
-                                <button onClick={async () => {
-                                    handleConfirmTransferClick()
-                                }}>
-                                    Confirm Transfer
-                                </button>
+                                {
+                                    !isTransferring &&
+                                    <>
+                                        <button onClick={() => setConfirmationModalOpen(false)}>
+                                            Cancel
+                                        </button>
+                                        <button onClick={async () => {
+                                            handleConfirmTransferClick()
+                                        }}>
+                                            Confirm Transfer
+                                        </button>                                      
+                                    </>
+                                }
+                                {
+                                    isTransferring &&
+                                    <Commet color="#32cd32" size="medium" text="" textColor="" />
+                                }
+
                             </div> 
                         </div>                        
                     }
