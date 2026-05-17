@@ -1,9 +1,9 @@
 import express from 'express'
-import { getToken, saveToken, unsaveToken } from '../../services/apple/authService.js'
+import { getDevToken, saveToken, unsaveToken } from '../../services/apple/authService.js'
 
 const router = express.Router()
 
-router.get('/dev-token', getToken)
+router.get('/dev-token', getDevToken)
 
 router.post('/save-token', saveToken)
 

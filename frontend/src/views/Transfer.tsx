@@ -71,7 +71,7 @@ export function Transfer() {
                 addStatusMessage(`Playlist ${p.name} is over 200 characters!`, 'error')
                 hasErrors = true
             }
-            if (p.description.length > 500) {
+            if (p.description && p.description.length > 500) {
                 addStatusMessage(`Playlist ${p.name} is over 500 characters!`, 'error')
                 hasErrors = true
             } 
@@ -158,7 +158,7 @@ export function Transfer() {
                             {
                                 playlistResult.status === 'success' &&
                                 Object.entries(playlistResult.stats).map(([key, value]) => (
-                                    <div className='translate-x-2'>
+                                    <div className='translate-x-2' key={`${playlistResult.sourcePlaylistId}-${key}`}>
                                         <span className='capitalize'>{humanizedTransferResults[key as keyof typeof humanizedTransferResults]}: </span>
                                         <span className='font-medium'>{value}</span>
                                     </div>

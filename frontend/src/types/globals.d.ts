@@ -7,7 +7,7 @@ interface MusicKitConfiguration {
 }
 
 interface MusicKitInstance {
-    isAuthorized: boolean,
+    isAuthorized(): boolean,
     authorize: () => Promise<string | void>,
     unauthorize: () => Promise<void>
 }

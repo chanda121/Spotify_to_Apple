@@ -30,7 +30,7 @@ const getDeveloperToken = () => {
     return createJWT(header, claims)
 }
 
-export const getToken = async (req: Request, res: Response) => {
+export const getDevToken = async (req: Request, res: Response) => {
     const devToken = getDeveloperToken()
     req.session.appleDevToken = devToken
     res.json({
