@@ -23,7 +23,7 @@ export function Transfer() {
 
     const authorize = useAppleStore(state => state.authorize)
     const unauthorize = useAppleStore(state => state.unauthorize)
-    const isMusicKitAuthorized = useAppleStore(state => state.isAuthorized)
+    const isAuthorized = useAppleStore(state => state.isAuthorized)
 
 
     const spotifyPlaylists = useSpotifyUserStore(state => state.playlists)
@@ -244,7 +244,7 @@ export function Transfer() {
                     <div className='flex justify-between'>
                         <div>Select playlists to transfer below</div>
                         {
-                            isMusicKitAuthorized &&
+                            isAuthorized &&
                             <button onClick={async () => {
                                 await unauthorize()
                                 addStatusMessage('logged out of apple music')
@@ -256,7 +256,7 @@ export function Transfer() {
                 </div>
 
                 {
-                    !isMusicKitAuthorized &&
+                    !isAuthorized &&
                     <div>
                         <h2>Authorize Apple Music</h2>
                         <button onClick={async () => {
@@ -265,7 +265,7 @@ export function Transfer() {
                     </div>
                 }
                 {
-                    isMusicKitAuthorized &&
+                    isAuthorized &&
                     <div className='flex justify-between top-4 sticky z-10'>
                         <div>
                             <div className='flex gap-5'>

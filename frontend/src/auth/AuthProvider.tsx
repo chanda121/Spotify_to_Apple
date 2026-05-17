@@ -8,6 +8,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const resetStore = useSpotifyUserStore(state => state.reset)
     const initializeMusicKit = useAppleStore(state => state.initializeMusicKit)
+    const updateAppleStatus = useAppleStore(state => state.updateStatus)
 
     const logout = async (): Promise<void> => {
         await fetch('/api/spotify/auth/logout')
@@ -60,8 +61,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             void fetchTopArtists()
             void fetchPlaylists()
             void initializeMusicKit()
+            void updateAppleStatus()
         }
-    }, [status, fetchUser, fetchTopTracks, fetchTopArtists, fetchPlaylists, initializeMusicKit])
+    }, [status, fetchUser, fetchTopTracks, fetchTopArtists, fetchPlaylists, initializeMusicKit, updateAppleStatus])
 
     return <AuthContext.Provider value={ {status, login, logout} }>
         { children }

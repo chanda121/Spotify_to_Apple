@@ -30,6 +30,13 @@ const getDeveloperToken = () => {
     return createJWT(header, claims)
 }
 
+export const isLinked = async (req: Request, res: Response) => {
+    const isLinked = req.session.appleDevToken && req.session.appleMusicUserToken
+    res.json({
+        isLinked
+    })
+}
+
 export const getDevToken = async (req: Request, res: Response) => {
     const devToken = getDeveloperToken()
     req.session.appleDevToken = devToken
@@ -38,7 +45,7 @@ export const getDevToken = async (req: Request, res: Response) => {
     })
 }
 
-export const saveToken = async (req: Request, res: Response) => {
+export const saveMut = async (req: Request, res: Response) => {
     const mut = req.body?.musicUserToken
     if (!mut) throw createError(400, 'Invalid Music Token')
     req.session.appleMusicUserToken = mut

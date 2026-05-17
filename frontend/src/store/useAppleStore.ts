@@ -7,13 +7,15 @@ interface AppleState {
     isLoadingMusicKit: boolean,
     musicKitError: string | null,
 
+    isAuthorized: boolean,
+
     playlists: ApplePlaylist[],
     isLoadingPlaylists: boolean,
     playlistError: string | null
 }
 interface AppleAction {
     initializeMusicKit: () => Promise<void>,
-    isAuthorized: () => boolean,
+    updateStatus: () => Promise<void>,
     authorize: () => Promise<void>,
     unauthorize: () => Promise<void>,
     fetchPlaylists: () => Promise<void>,
@@ -23,15 +25,22 @@ interface AppleAction {
 type devToken = {
     devToken: string
 }
+type isLinked = {
+    isLinked: boolean
+}
 
 export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
     musicKitConfigured: false,
     isLoadingMusicKit: false,
     musicKitError: null,
 
+    isAuthorized: false,
+
     playlists: [],
     isLoadingPlaylists: false,
     playlistError: null,
+
+    
 
     initializeMusicKit: async () => {
         if (get().musicKitConfigured || get().isLoadingMusicKit) return
@@ -62,7 +71,6 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
             })
             
             set({ musicKitConfigured: true })
-
         } catch (err) {
             const msg = err instanceof Error ? err.message : 'Unexepected error while initializing Music Kit'
             set({ musicKitError: msg })
@@ -73,8 +81,16 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
 
     },
 
-    isAuthorized: () => {
-        return window.MusicKit?.getInstance().isAuthorized() ?? false
+    updateStatus: async () => {
+        const res = await fetch('/api/apple/auth/is-linked')
+        if (!res.ok) {
+            console.error('failed to get authorization status')
+            throw new Error('failed to get authorization status')
+        } else {
+            const isLinked:isLinked = await res.json()
+
+            set({ isAuthorized: isLinked.isLinked })
+        }
     },
 
     authorize: async () => {
@@ -95,6 +111,7 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
         const message = await res.json()
 
         if(!res.ok) console.error('error authorizing', message)
+        else set({ isAuthorized: true })
     },
 
     unauthorize: async () => {
@@ -103,7 +120,9 @@ export const useAppleStore = create<AppleState & AppleAction>((set, get) => ({
         const res = await fetch('/api/apple/auth/logout')
 
         if(!res.ok) console.error(`failed to logout??`)
+        set({ musicKitConfigured: false, isAuthorized: false })
         await musicKit?.unauthorize()
+        await get().initializeMusicKit()
     },
 
     fetchPlaylists: async () => {
