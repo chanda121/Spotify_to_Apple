@@ -31,9 +31,9 @@ const getDeveloperToken = () => {
 }
 
 export const isLinked = async (req: Request, res: Response) => {
-    const isLinked = req.session.appleDevToken && req.session.appleMusicUserToken
+    const isLinked = !!(req.session.appleDevToken && req.session.appleMusicUserToken)
     res.json({
-        isLinked
+        isLinked,
     })
 }
 

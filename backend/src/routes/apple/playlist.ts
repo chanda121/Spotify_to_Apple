@@ -44,7 +44,7 @@ const parseTransferRequest = (body: unknown): TransferPlaylistInput[] => {
     for (const item of raw) {
         if (typeof item?.id !== 'string' || item.id.length === 0) throw createError(400, 'A playlist id seems off...')
         if (typeof item?.name !== 'string' || item.name.length > 200) throw createError(400, 'Playlist name over 200 characters')
-        if (item.description) {
+        if (item.description || typeof item.description === 'string') {
             if (item.description.length > 500) throw createError(400, 'Playlist description over 500 characters')
         }
         parsed.push({id: item.id, name: item.name, description: item.description ?? ''})
