@@ -17,3 +17,6 @@
 * To run Docker & Redis - navigate to root and run `docker compose up -d`
 *-* To turn off Docker & Redis - navigate to root and run `docker compose down` with optional flag `-v` to remove the volume, hence all session data
 *-* To see redis logs - navigate to root and run `docker compose logs -f redis`
+
+## Spotify API notes
+* App can't be used by anyone, only 5 users can use app at a time since, and they must be personally added onto an allowlist.
