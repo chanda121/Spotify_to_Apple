@@ -3,6 +3,8 @@ import { AuthContext } from './authContext'
 import { useSpotifyUserStore } from '../store/useSpotifyUserStore'
 import { useAppleStore } from '../store/useAppleStore'
 
+const origin = import.meta.env.ORIGIN ?? window.location.origin
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [status, setStatus] = useState<'loggedIn' | 'loggedOut' | 'loading'>('loading')
 
@@ -14,7 +16,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         await fetch('/api/spotify/auth/logout')
         resetStore() // Clear all cached data
         setStatus('loggedOut')
-        window.location.href = 'http://127.0.0.1:5173/'
+        window.location.href = origin
     }
 
     const login = () => {

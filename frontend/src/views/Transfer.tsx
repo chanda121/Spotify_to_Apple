@@ -16,7 +16,6 @@ type statusMessage = {
 export function Transfer() {
     const [statusMessage, setStatusMessage] = useState<statusMessage[]>([])
     const [confirmationModalOpen, setConfirmationModalOpen] = useState<boolean>(false)
-    const [isTransferring, setIsTransferring] = useState<boolean>(false)
     const [transferComplete, setTransferComplete] = useState<boolean>(false)
 
     const PLAYLIST_IMG_SIZE = 60
@@ -37,6 +36,8 @@ export function Transfer() {
     const clearTransferPlaylists = useTransferStore(state => state.clearTransferPlaylists)
     const clearResults = useTransferStore(state => state.clearResults)
     const transferPlaylists = useTransferStore(state => state.transferPlaylists)
+    const isTransferring = useTransferStore(state => state.isTransferring)
+    const transferError = useTransferStore(state => state.transferError)
 
     const addStatusMessage = (text: string, type: statusMessage['type'] = 'info') => {
         const id = crypto.randomUUID()
@@ -81,10 +82,8 @@ export function Transfer() {
     }
 
     const handleConfirmTransferClick = async () => {
-        setIsTransferring(true)
         await transferPlaylists()
         clearTransferPlaylists()
-        setIsTransferring(false)
         setTransferComplete(true)
     }
 
@@ -182,57 +181,70 @@ export function Transfer() {
                         if (!isTransferring && !transferComplete) setConfirmationModalOpen(false)
                     }}
                     >
-                    {
-                        !transferComplete &&
-                        <div
-                            className='w-full max-w-lg rounded-lg p-6 shadow-xl border-blue-100 border app-surface'
-                            onClick={event => event.stopPropagation()}>
-                            <h2 className='text-xl font-bold'>Confirm Transfer</h2>
-                            <div>
-                                {displayPlaylistsToBeTransferred()}
-                            </div>
-                            <div className='mt-6 flex justify-end gap-3'>
-                                {
-                                    !isTransferring &&
-                                    <>
-                                        <button onClick={() => setConfirmationModalOpen(false)}>
-                                            Cancel
-                                        </button>
-                                        <button onClick={async () => {
-                                            handleConfirmTransferClick()
-                                        }}>
-                                            Confirm Transfer
-                                        </button>                                      
-                                    </>
-                                }
-                                {
-                                    isTransferring &&
-                                    <Commet color="#32cd32" size="medium" text="" textColor="" />
-                                }
+                    <div
+                        className='w-full max-w-lg rounded-lg p-6 shadow-xl border-blue-100 border app-surface'
+                        onClick={event => event.stopPropagation()}>
+                        {
+                            !transferComplete &&
+                            <>
+                                <h2 className='text-xl font-bold'>Confirm Transfer</h2>
+                                <div>
+                                    {displayPlaylistsToBeTransferred()}
+                                </div>
+                                <div className='mt-6 flex justify-end gap-3'>
+                                    {
+                                        !isTransferring &&
+                                        <>
+                                            <button onClick={() => setConfirmationModalOpen(false)}>
+                                                Cancel
+                                            </button>
+                                            <button onClick={async () => {
+                                                handleConfirmTransferClick()
+                                            }}>
+                                                Confirm Transfer
+                                            </button>                                      
+                                        </>
+                                    }
+                                    {
+                                        isTransferring &&
+                                        <Commet color="#32cd32" size="medium" text="" textColor="" />
+                                    }
 
-                            </div> 
-                        </div>                        
-                    }
-                    {
-                        transferComplete &&
-                        <div
-                            className='w-full max-w-lg rounded-lg p-6 shadow-xl border-blue-100 border app-surface'
-                            onClick={event => event.stopPropagation()}>
-                            <h2 className='text-xl font-bold'>Transfer Complete!</h2>
-                            <div>
-                                {displayPlaylistTransferResults()}
-                            </div>
-                            <div className='mt-4 flex justify-end'>
-                                <button onClick={() => {
-                                    setConfirmationModalOpen(false)
-                                    setTransferComplete(false)
-                                    clearResults()                                    
-                                }}>
-                                    OK
-                                </button>
-                            </div>
-                        </div>
-                    }
+                                </div> 
+                            </>                    
+                        }
+                        {/* TRANSFER FINISHED WITH UNKNOWN */}
+                        {
+                            transferComplete && !transferError &&
+                            <>
+                                <h2 className='text-xl font-bold'>Transfer Complete!</h2>
+                                <div>
+                                    {displayPlaylistTransferResults()}
+                                </div>
+                                <div className='mt-4 flex justify-end'>
+                                    <button onClick={() => {
+                                        setConfirmationModalOpen(false)
+                                        setTransferComplete(false)
+                                        clearResults()                                    
+                                    }}>
+                                        OK
+                                    </button>
+                                </div>
+                            </>
+                        }
+                        {
+                            transferComplete && transferError &&
+                            <>
+                                <h2 className='text-xl font-bold'>Something went wrong...</h2>
+                                <div>
+                                    {transferError}
+                                </div>
+                            </>
+                        }
+                    </div>
+
+
+
 
                 </div>
             }
