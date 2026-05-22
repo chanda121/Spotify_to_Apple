@@ -30,12 +30,12 @@ export function Stats() {
             <SideBarMenu items={SIDEBAR_SECTIONS}/>
             <div className='max-w-4xl mx-auto flex content-center flex-col space-y-5'>
                 <section id='user-stats' key='user-stats' className='py-15'>
-                    <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20'>Stats here</h1>
+                    <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-pink-900/15 dark:border-pink-200/20'>Stats here</h1>
                     {!userLoading &&
-                        <div>
+                        <div className='stat-card rounded-xl p-4'>
                             {user && 
                             Object.entries(user).filter(([key]) => key !== 'images').map(([key, value]) => (
-                                <div key={key} className='flex justify-between py-1 border-b last:border-0 border-black/20 dark:border-white/20'>
+                                <div key={key} className='flex justify-between py-1 border-b last:border-0 border-pink-900/10 dark:border-pink-200/15'>
                                     <span className='capitalize'>{key}</span>
                                     <span className='font-medium'>{value}</span>
                                 </div>
@@ -55,13 +55,13 @@ export function Stats() {
                     }            
                 </section>
                 <section id='top-tracks' key='Top-Tracks' className='pb-15'>
-                    <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20'>Top Tracks</h1>
+                    <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-pink-900/15 dark:border-pink-200/20'>Top Tracks</h1>
                     {!topTracksLoading &&
                         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                             {
                                 topTracks.map((track, index) => (
-                                    <div key={track.id} className='flex items-center gap-4 p-3 rounded-lg row-hover'>
-                                        <span className='w-8 text-2xl font-bold text-black/30 dark:text-white/30'>{index + 1}</span>
+                                    <div key={track.id} className='flex items-center gap-4 p-3 rounded-lg stat-card hover:translate-x-1'>
+                                        <span className='w-8 text-2xl font-bold text-pink-900/25 dark:text-pink-100/25'>{index + 1}</span>
                                         <div>
                                             <div className='font-semibold'>{track.name}</div>
                                             <div className='italic'>{track.artists.map(a => a.name).join(', ')}</div>
@@ -82,12 +82,12 @@ export function Stats() {
                     }
                 </section>
                 <section id='top-artists' key='Top-Artists' className='pb-15'>
-                    <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-black/40 dark:border-white/20'>Top Artists</h1>
+                    <h1 className='text-3xl font-bold mb-6 border-b pb-2 border-pink-900/15 dark:border-pink-200/20'>Top Artists</h1>
                     {!topArtistsLoading &&
                         <div className='grid grid-cols-1 sm:grid-cols-2 gap-4'>
                             {
                                 topArtists.map((artist, index) => (
-                                    <div key={artist.id} className='flex items-center gap-4 rounded-xl p-4 row-hover'>
+                                    <div key={artist.id} className='flex items-center gap-4 rounded-xl p-4 stat-card hover:translate-x-1'>
 
                                         {
                                             artist.images?.length && artist.images[1] &&
@@ -101,7 +101,7 @@ export function Stats() {
                                         
                                         }
                                         <div className='content-center font-bold text-2xl'>
-                                            <span className='text-black/40 dark:text-white/40 text-sm'>#{index + 1}</span>
+                                            <span className='text-pink-900/35 dark:text-pink-100/35 text-sm'>#{index + 1}</span>
                                             <div className='font-bold text-lg'>{artist.name}</div>
                                         </div>
                                         

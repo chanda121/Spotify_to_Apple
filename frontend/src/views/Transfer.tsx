@@ -111,7 +111,7 @@ export function Transfer() {
                             className='rounded-md object-cover'
                             />
                         :
-                        <div className='bg-gray-100 rounded-md object-cover flex justify-center items-center'
+                        <div className='app-surface-secondary rounded-md object-cover flex justify-center items-center'
                             style={{ width: PLAYLIST_IMG_SIZE, height: PLAYLIST_IMG_SIZE }}
                             >
                             <img src={MusicalNoteIcon} style={{width: PLAYLIST_IMG_SIZE/2, height: PLAYLIST_IMG_SIZE/2}}/>
@@ -182,7 +182,7 @@ export function Transfer() {
                     }}
                     >
                     <div
-                        className='w-full max-w-lg rounded-lg p-6 shadow-xl border-blue-100 border app-surface'
+                        className='w-full max-w-lg rounded-lg p-6 shadow-xl border border-pink-200 dark:border-pink-900/50 app-surface'
                         onClick={event => event.stopPropagation()}>
                         {
                             !transferComplete &&
@@ -207,7 +207,7 @@ export function Transfer() {
                                     }
                                     {
                                         isTransferring &&
-                                        <Commet color="#32cd32" size="medium" text="" textColor="" />
+                                        <Commet color="#db2777" size="medium" text="" textColor="" />
                                     }
 
                                 </div> 
