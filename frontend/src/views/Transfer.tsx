@@ -111,10 +111,17 @@ export function Transfer() {
                             className='rounded-md object-cover'
                             />
                         :
-                        <div className='app-surface-secondary rounded-md object-cover flex justify-center items-center'
+                        <div
+                            className='rounded-md flex justify-center items-center bg-pink-100 border border-pink-200/80 dark:bg-pink-950/60 dark:border-pink-700/50'
                             style={{ width: PLAYLIST_IMG_SIZE, height: PLAYLIST_IMG_SIZE }}
                             >
-                            <img src={MusicalNoteIcon} style={{width: PLAYLIST_IMG_SIZE/2, height: PLAYLIST_IMG_SIZE/2}}/>
+                            <img
+                                src={MusicalNoteIcon}
+                                alt=''
+                                aria-hidden
+                                className='opacity-80 dark:invert dark:opacity-90'
+                                style={{ width: PLAYLIST_IMG_SIZE / 2, height: PLAYLIST_IMG_SIZE / 2 }}
+                                />
                         </div>
                     }
                     <div className='font-bold text-sm truncate'>{playlist.name}</div>
